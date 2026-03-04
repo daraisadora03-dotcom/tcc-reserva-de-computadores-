@@ -300,13 +300,13 @@
     const timeToMin = (time) => { const [h, m] = time.split(':').map(Number); return h * 60 + m; };
     const minToTime = (min) => { const h = Math.floor(min / 60); const m = min % 60; return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`; };
 
-    // Gera os slots de 55 min pulando intervalos
+    // Gera os slots de 50 min pulando intervalos
     function gerarSlots(turnoKey) {
         const config = CONFIG[turnoKey];
         let atual = timeToMin(config.inicio);
         const fimDia = timeToMin(config.fim);
         const slots = [];
-        const duracaoAula = 55;
+        const duracaoAula = 50;
 
         while (atual < fimDia) {
             let colideIntervalo = false;
