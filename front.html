@@ -42,6 +42,7 @@
             border-radius: 5px; cursor: pointer; font-size: 1.1rem; font-weight: 600; transition: 0.3s; margin-top: 1rem;
         }
         .login-box button:hover { background: #2980b9; transform: translateY(-2px); }
+
         .note { font-size: 0.8rem; color: #777; margin-top: 1rem; }
 
         /* --- LAYOUT DA APLICAÇÃO --- */
@@ -78,8 +79,8 @@
         .calendar-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
         .calendar-controls h3 { color: var(--primary); }
         .calendar-controls button { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--secondary); }
-        .calendar-grid-header { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-weight: bold; margin-bottom: 10px; color: #777; }
-        .calendar-body { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
+        .calendar-grid-header { display: grid; grid-template-columns: repeat(5, 1fr); text-align: center; font-weight: bold; margin-bottom: 10px; color: #777; }
+        .calendar-body { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
 
         .day-cell {
             background: white; min-height: 120px; padding: 10px; border-radius: 8px; border: 1px solid var(--border-light);
@@ -118,6 +119,80 @@
             width: 100%; padding: 12px; background: var(--green-ok); color: white; border: none;
             border-radius: 5px; cursor: pointer; font-size: 1rem; font-weight: 600; margin-top: 1rem;
         }
+
+        /* --- TABS ADMIN --- */
+        .admin-tabs { display: flex; border-bottom: 1px solid #ddd; margin-bottom: 15px; gap: 10px; }
+        .admin-tab-btn {
+            background: none; border: none; padding: 10px 15px; cursor: pointer;
+            font-weight: 600; color: #555; border-bottom: 3px solid transparent; transition: 0.3s;
+        }
+        .admin-tab-btn:hover { color: var(--primary); background: #f9f9f9; }
+        .admin-tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+        .admin-tab-content { display: none; }
+        .admin-tab-content.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Lista de Usuários */
+        .user-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee; }
+        .user-item:last-child { border-bottom: none; }
+        .user-role { font-size: 0.8rem; background: #eee; padding: 2px 8px; border-radius: 4px; color: #555; }
+        .btn-delete-user { color: var(--accent); cursor: pointer; border: none; background: none; margin-left: 10px; }
+        
+        /* Select style fix */
+        select.input-fix { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; font-size: 1rem; background: white; }
+
+        /* --- NOVOS ESTILOS ADMIN (DASHBOARD) --- */
+        .admin-toolbar { display: flex; justify-content: space-between; margin-bottom: 15px; gap: 10px; }
+        .search-input { padding: 8px 12px; border: 1px solid #ccc; border-radius: 5px; flex: 1; max-width: 300px; }
+        
+        /* Tabelas */
+        .data-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        .data-table th, .data-table td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        .data-table th { background-color: #f8f9fa; color: var(--primary); font-weight: 600; }
+        .data-table tr:hover { background-color: #f1f1f1; }
+        
+        /* Badges e Botões de Ação */
+        .status-badge { padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+        .status-badge.pendente { background: #ffeeba; color: #856404; }
+        .status-badge.ok { background: #d4edda; color: #155724; }
+        .status-badge.erro { background: #f8d7da; color: #721c24; }
+        
+        .action-btn { border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; transition: 0.2s; display: inline-flex; align-items: center; gap: 5px; }
+        .btn-approve { background: var(--green-ok); color: white; }
+        .btn-resolve { background: var(--secondary); color: white; }
+        .btn-delete { background: var(--accent); color: white; }
+        .action-btn:hover { opacity: 0.9; transform: scale(1.02); }
+
+        /* Cards de Recursos (Carrinhos) */
+        .resources-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
+        .resource-card { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 15px; text-align: center; position: relative; overflow: hidden; }
+        .resource-card.in-use { border-color: var(--yellow-warn); background: #fffdf5; }
+        .resource-card.available { border-color: var(--green-ok); background: #fafffb; }
+        .res-icon { font-size: 2rem; margin-bottom: 10px; display: block; }
+        .res-status { font-size: 0.8rem; font-weight: bold; margin-top: 5px; display: block; }
+        .in-use .res-icon, .in-use .res-status { color: var(--yellow-warn); }
+        .available .res-icon, .available .res-status { color: var(--green-ok); }
+
+        /* Alert Card Pendência */
+        .pending-card { border-left: 4px solid var(--accent); background: #fff; padding: 15px; margin-bottom: 10px; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; }
+        .pending-info h5 { margin: 0 0 5px 0; font-size: 1rem; color: #333; }
+        .pending-info p { margin: 0; font-size: 0.85rem; color: #666; }
+        
+        /* Info Aula Sugerida no Modal */
+        .aula-info-box { background: #e3f2fd; color: #0d47a1; padding: 10px; border-radius: 5px; margin-bottom: 15px; border-left: 4px solid #2196f3; font-size: 0.9rem; display: none; }
+
+        /* --- PAINEL DE SELEÇÃO LATERAL (NOVO) --- */
+        .modal-content { transition: max-width 0.3s ease; }
+        .modal-content.expanded { max-width: 800px; } /* Expande o modal */
+        .modal-body-flex { display: flex; gap: 20px; align-items: flex-start; }
+        .form-side { flex: 1; min-width: 300px; }
+        .panel-side { display: none; width: 320px; border-left: 1px solid #eee; padding-left: 20px; animation: fadeIn 0.3s; }
+        .modal-content.expanded .panel-side { display: block; }
+        .tags-container { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 15px; }
+        .tag-btn { padding: 5px 10px; border: 1px solid #ddd; border-radius: 15px; background: #f8f9fa; cursor: pointer; font-size: 0.8rem; transition: 0.2s; color: #555; }
+        .tag-btn:hover { background: #e9ecef; border-color: #ced4da; }
+        .tag-btn.selected { background: var(--primary); color: white; border-color: var(--primary); }
+        .panel-title { font-size: 0.9rem; font-weight: bold; color: var(--primary); margin-bottom: 8px; display: block; }
     </style>
 </head>
 <body>
@@ -137,7 +212,7 @@
                 </div>
                 <button type="submit">Entrar</button>
             </form>
-            <p class="note">Cadastro inicial deve ser feito na secretaria.</p>
+            <p class="note">Dúvidas? Procure a secretaria.</p>
         </div>
     </div>
 
@@ -157,8 +232,8 @@
                     <li class="active" data-id="c1" data-total="40" data-has-mouse="false">
                         <i class="fa-solid fa-laptop"></i> Carrinho 1 (40 Nots)
                     </li>
-                    <li data-id="c2" data-total="40" data-has-mouse="true">
-                        <i class="fa-solid fa-computer-mouse"></i> Carrinho 2 (+Mouses)
+                    <li data-id="c2" data-total="40" data-has-mouse="false">
+                        <i class="fa-solid fa-laptop"></i> Carrinho 2 (40 Nots)
                     </li>
                     <li data-id="c3" data-total="40" data-has-mouse="false">
                         <i class="fa-solid fa-tablet-screen-button"></i> Carrinho 3 (Tablets)
@@ -166,9 +241,10 @@
                     <li data-id="lab" data-total="15" data-has-mouse="false">
                         <i class="fa-solid fa-desktop"></i> Lab. Acessa (~15 PCs)
                     </li>
-                    <li data-id="tec" data-total="5" data-has-mouse="false">
-                        <i class="fa-solid fa-screwdriver-wrench"></i> Nots do Técnico
+                    <li data-id="tec" data-total="40" data-has-mouse="true">
+                        <i class="fa-solid fa-screwdriver-wrench"></i> Nots do Técnico (+Mouses)
                     </li>
+                    <li id="btn-sala-tecnica"><i class="fa-solid fa-server"></i> Sala Técnica</li>
                 </ul>
 
                 <p class="menu-title">Gestão</p>
@@ -186,6 +262,7 @@
 
         <!-- Conteúdo Principal -->
         <main class="content">
+            
             <header>
                 <h2>Calendário de Reservas</h2>
                 <div class="filters">
@@ -205,7 +282,7 @@
             </div>
 
             <div class="calendar-grid-header">
-                <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+                <div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div>
             </div>
             <div id="calendar-body" class="calendar-body">
                 <!-- Dias e horários serão gerados pelo JavaScript -->
@@ -222,6 +299,7 @@
     <!-- MODAL DE RESERVA -->
     <div id="modal-reserva" class="modal">
         <div class="modal-content">
+        <div class="modal-content" id="reserva-content">
             <span class="close">&times;</span>
             <h3>Nova Reserva</h3>
             <div class="modal-info">
@@ -229,11 +307,62 @@
                 <p><strong>Data:</strong> <span id="res-data"></span></p>
                 <p><strong>Horário:</strong> <span id="res-hora"></span></p>
             </div>
+            
+            <div class="modal-body-flex">
+                <!-- Lado Esquerdo: Formulário -->
+                <div class="form-side">
+                    <div class="modal-info">
+                        <p><strong>Recurso:</strong> <span id="res-recurso"></span></p>
+                        <p><strong>Data:</strong> <span id="res-data"></span></p>
+                        <p><strong>Horário:</strong> <span id="res-hora"></span></p>
+                    </div>
+
+            <!-- Box de sugestão da aula -->
+            <div id="aula-sugerida-box" class="aula-info-box">
+                <i class="fa-solid fa-chalkboard-user"></i> <strong>Sua Aula:</strong> <span id="aula-sugerida-texto"></span>
+            </div>
+                    <!-- Box de sugestão da aula -->
+                    <div id="aula-sugerida-box" class="aula-info-box">
+                        <i class="fa-solid fa-chalkboard-user"></i> <strong>Sua Aula:</strong> <span id="aula-sugerida-texto"></span>
+                    </div>
 
             <form id="form-reserva">
                 <div class="input-group">
+                    <label for="res-turma">Turma / Disciplina:</label>
+                    <input type="text" id="res-turma" placeholder="Ex: 3º A - História" required>
+                </div>
+                    <form id="form-reserva">
+                        <div class="input-group">
+                            <label for="res-turma">Turma / Disciplina:</label>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="text" id="res-turma" placeholder="Ex: 3º A - História" required style="flex:1;">
+                                <button type="button" id="btn-toggle-list" style="padding: 0 12px; border: 1px solid #ccc; background: #eee; border-radius: 5px; cursor: pointer;" title="Selecionar da Lista"><i class="fa-solid fa-list"></i></button>
+                            </div>
+                        </div>
+
+                <div class="input-group">
                     <label for="qtd-retirada">Quantidade a Retirar:</label>
                     <input type="number" id="qtd-retirada" min="1" value="40">
+                        <div class="input-group">
+                            <label for="qtd-retirada">Quantidade a Retirar:</label>
+                            <input type="number" id="qtd-retirada" min="1" value="40">
+                        </div>
+                        
+                        <div id="mouse-check-group" style="display:none;" class="input-group">
+                            <label><i class="fa-solid fa-computer-mouse"></i> Relatar problema com mouses?</label>
+                            <select id="mouse-status" class="input-group input">
+                                <option value="ok">Não, todos funcionando</option>
+                                <option value="problema">Sim, alguns com defeito</option>
+                            </select>
+                        </div>
+
+                        <div class="alert-box">
+                            <i class="fa-solid fa-battery-full fa-2x"></i>
+                            <strong>ATENÇÃO:</strong> Ao devolver, coloque todos os equipamentos para carregar imediatamente!
+                        </div>
+
+                        <button type="submit" class="btn-confirm">Confirmar Reserva</button>
+                    </form>
                 </div>
                 
                 <div id="mouse-check-group" style="display:none;" class="input-group">
@@ -247,10 +376,93 @@
                 <div class="alert-box">
                     <i class="fa-solid fa-battery-full fa-2x"></i>
                     <strong>ATENÇÃO:</strong> Ao devolver, coloque todos os equipamentos para carregar imediatamente!
+                <!-- Lado Direito: Painel de Seleção (Aba Lateral) -->
+                <div class="panel-side" id="selection-panel">
+                    <span class="panel-title">Selecione a Turma:</span>
+                    <div class="tags-container" id="list-turmas">
+                        <!-- Gerado via JS -->
+                    </div>
+                    
+                    <span class="panel-title">Selecione a Disciplina:</span>
+                    <div class="tags-container" id="list-materias">
+                        <!-- Gerado via JS -->
+                    </div>
                 </div>
 
                 <button type="submit" class="btn-confirm">Confirmar Reserva</button>
             </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE ADMINISTRAÇÃO -->
+    <div id="modal-admin" class="modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <span class="close">&times;</span>
+            <h3>Área da Direção</h3>
+
+            <div class="admin-tabs">
+                <button class="admin-tab-btn active" data-target="tab-manutencao">Manutenção de Aparelhos</button>
+                <button class="admin-tab-btn" data-target="tab-usuarios">Professores Cadastrados</button>
+                <button class="admin-tab-btn" data-target="tab-pendencias">Pendência de Professor que falta realizar o cadastro <span id="badge-pend" style="background:var(--accent); color:white; border-radius:50%; padding:2px 6px; font-size:0.7rem;">!</span></button>
+            </div>
+
+            <!-- Tab: Pendências (Prioridade) -->
+            <div id="tab-pendencias" class="admin-tab-content">
+                <h4 style="margin-bottom: 1rem; color: var(--primary);">Pendência de Professor que falta realizar o cadastro</h4>
+                <div id="admin-pendencias-list" style="max-height: 400px; overflow-y: auto;"></div>
+            </div>
+
+            <!-- Tab: Manutenção -->
+            <div id="tab-manutencao" class="admin-tab-content active">
+                <h4 style="margin-bottom: 1rem; color: var(--primary);">Controle de Manutenção</h4>
+                <div class="table-container" style="max-height: 400px; overflow-y: auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Equipamento</th>
+                                <th>Defeito</th>
+                                <th>Data Reporte</th>
+                                <th>Previsão</th>
+                                <th>Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-problemas-list"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab: Lista de Professores -->
+            <div id="tab-usuarios" class="admin-tab-content">
+                <div class="admin-toolbar">
+                    <input type="text" id="search-prof" class="search-input" placeholder="Buscar por nome ou CPF...">
+                    <button id="btn-novo-usuario" class="action-btn" style="background: var(--secondary); color: white;">+ Novo Usuário</button>
+                </div>
+                
+                <div class="table-container" style="max-height: 400px; overflow-y: auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>CPF</th>
+                                <th>Função</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-users-list"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL SALA TÉCNICA -->
+    <div id="modal-sala-tecnica" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Sala Técnica</h3>
+            <p>Área destinada à equipe técnica.</p>
+            <p style="color: #777; font-style: italic;">Funcionalidades em desenvolvimento...</p>
         </div>
     </div>
 
@@ -259,16 +471,47 @@
         <div class="modal-content">
             <span class="close">&times;</span>
             <h3>Reportar Problema</h3>
-            <form>
+            <form id="form-manutencao">
                 <div class="input-group">
                     <label>Equipamento:</label>
-                    <input type="text" placeholder="Ex: Notebook #12 - Carrinho 1">
+                    <input type="text" id="manut-equipamento" placeholder="Ex: Notebook #12 - Carrinho 1" required>
                 </div>
                 <div class="input-group">
                     <label>Descrição do defeito:</label>
-                    <textarea rows="3" placeholder="Ex: A tela não liga, teclado com tecla 'A' falhando."></textarea>
+                    <textarea id="manut-descricao" rows="3" placeholder="Ex: A tela não liga, teclado com tecla 'A' falhando." required></textarea>
                 </div>
-                <button type="button" class="btn-confirm" onclick="alert('Relatório de manutenção enviado para a gestão!')">Enviar Reporte</button>
+                <button type="submit" class="btn-confirm">Enviar Reporte</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DE CADASTRO DE USUÁRIO -->
+    <div id="modal-cadastro" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Cadastrar Usuário</h3>
+            <form id="form-cadastro">
+                <div class="input-group">
+                    <label>Nome Completo</label>
+                    <input type="text" id="cad-nome" required>
+                </div>
+                <div class="input-group">
+                    <label>CPF (Apenas números)</label>
+                    <input type="text" id="cad-cpf" placeholder="Somente números" maxlength="11" required>
+                </div>
+                <div class="input-group">
+                    <label>Senha</label>
+                    <input type="text" id="cad-senha" required>
+                </div>
+                <div class="input-group">
+                    <label id="lbl-cad-role">Função</label>
+                    <select id="cad-role" class="input-fix">
+                        <option value="professor">Professor</option>
+                        <option value="direcao">Direção</option>
+                        <option value="admin">Administrador TI</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-confirm">Salvar Cadastro</button>
             </form>
         </div>
     </div>
@@ -288,44 +531,159 @@
         }
     };
 
+    // --- GERENCIAMENTO DE USUÁRIOS (COM LOCALSTORAGE) ---
+    const DEFAULT_USERS = {
+        "11111111111": { nome: "Prof. Carlos", senha: "123", role: "professor" },
+        "22222222222": { nome: "Prof. Ana", senha: "123", role: "professor" },
+        "33333333333": { nome: "Diretora Maria", senha: "admin", role: "direcao" },
+        "44444444444": { nome: "Admin TI", senha: "admin", role: "admin" }
+    };
+
+    // Carrega usuários salvos ou usa o padrão
+    let USERS = JSON.parse(localStorage.getItem('sge_users')) || DEFAULT_USERS;
+
+    function saveUsers() {
+        localStorage.setItem('sge_users', JSON.stringify(USERS));
+    }
+
+    // --- GERENCIAMENTO DE RESERVAS (PERSISTÊNCIA) ---
+    function saveReservas() {
+        localStorage.setItem('sge_reservas', JSON.stringify(Array.from(estado.reservas.entries())));
+    }
+
+    function loadReservas() {
+        const saved = localStorage.getItem('sge_reservas');
+        return saved ? new Map(JSON.parse(saved)) : new Map();
+    }
+
     // --- ESTADO GLOBAL DA APLICAÇÃO ---
     let estado = {
+        usuarioLogado: null,
         turnoAtual: 'fundamental',
         recursoSelecionado: { id: 'c1', nome: 'Carrinho 1 (40 Nots)', total: 40, hasMouse: false },
         dataAtual: new Date(),
-        reservas: new Set() // Usamos um Set para performance e evitar duplicados
+        reservas: loadReservas(), // Carrega reservas salvas
+        problemas: [ // Dados Mockados de exemplo
+            { id: 'p1', equipamento: 'Notebook #04 (C1)', descricao: 'Tela piscando intermitente', data: '12/03/2026', previsao: '15/03/2026', status: 'Aberto', reportadoPor: 'Prof. Ana' },
+            { id: 'p2', equipamento: 'Tablet #10 (C3)', descricao: 'Não conecta no Wi-Fi', data: '10/03/2026', previsao: '14/03/2026', status: 'Em Análise', reportadoPor: 'Prof. Carlos' }
+        ],
+        pendencias: [ // Lista simulada de pendências
+            { id: 1, nome: "Prof. Rogério Silva", cpf: "555.555.555-55", data: "13/03/2026", obs: "Falta comprovante de residência." },
+            { id: 2, nome: "Profa. Cláudia Mendes", cpf: "666.666.666-66", data: "12/03/2026", obs: "Aguardando aprovação da direção." }
+        ]
     };
+
+    // --- GRADE HORÁRIA (SIMULAÇÃO) ---
+    // Estrutura: NomeProfessor -> DiaSemana (0=Dom, 1=Seg...) -> Lista de Aulas
+    const MOCK_HORARIOS = {
+        "Prof. Carlos": {
+            1: [{hora: "07:00", turma: "9º A", mat: "Matemática"}, {hora: "07:50", turma: "9º B", mat: "Matemática"}, {hora: "10:00", turma: "8º C", mat: "Matemática"}], // Segunda
+            2: [{hora: "08:40", turma: "7º A", mat: "Matemática"}, {hora: "11:30", turma: "9º A", mat: "Orientação de Estudos"}], // Terça
+            3: [{hora: "07:00", turma: "6º B", mat: "Eletiva"}, {hora: "17:05", turma: "3º Médio", mat: "Matemática Avançada"}], // Quarta (Exemplo)
+            4: [{hora: "09:30", turma: "9º B", mat: "Matemática"}], // Quinta
+            5: [{hora: "07:00", turma: "9º A", mat: "Matemática"}]  // Sexta
+        },
+        "Prof. Ana": {
+            1: [{hora: "13:00", turma: "1º A", mat: "Português"}],
+            3: [{hora: "17:05", turma: "3º B", mat: "Literatura"}] // Exemplo Quarta
+        }
+    };
+
+    // --- DADOS PARA O PAINEL LATERAL ---
+    const LISTA_TURMAS = ["6º A", "6º B", "6º C", "7º A", "7º B", "7º C", "8º A", "8º B", "8º C", "9º A", "9º B", "9º C", "1º A", "1º B", "2º A", "2º B", "3º A", "3º B"];
+    const LISTA_MATERIAS = ["Matemática", "Português", "História", "Geografia", "Ciências", "Física", "Química", "Biologia", "Inglês", "Artes", "Ed. Física", "Filosofia", "Sociologia", "Projeto de Vida", "Tecnologia", "Eletiva"];
+
+    // Variáveis temporárias para seleção
+    let selTurma = "";
+    let selMateria = "";
+
+    function renderSidePanel() {
+        const divTurmas = document.getElementById('list-turmas');
+        const divMaterias = document.getElementById('list-materias');
+        
+        divTurmas.innerHTML = '';
+        divMaterias.innerHTML = '';
+
+        LISTA_TURMAS.forEach(t => {
+            const btn = document.createElement('button');
+            btn.className = 'tag-btn';
+            btn.innerText = t;
+            btn.onclick = () => {
+                selTurma = t;
+                updateInputReserva();
+                document.querySelectorAll('#list-turmas .tag-btn').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+            };
+            divTurmas.appendChild(btn);
+        });
+
+        LISTA_MATERIAS.forEach(m => {
+            const btn = document.createElement('button');
+            btn.className = 'tag-btn';
+            btn.innerText = m;
+            btn.onclick = () => {
+                selMateria = m;
+                updateInputReserva();
+                document.querySelectorAll('#list-materias .tag-btn').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+            };
+            divMaterias.appendChild(btn);
+        });
+    }
+
+    function updateInputReserva() {
+        const input = document.getElementById('res-turma');
+        if (selTurma && selMateria) {
+            input.value = `${selTurma} - ${selMateria}`;
+        } else if (selTurma) {
+            input.value = selTurma;
+        } else if (selMateria) {
+            input.value = selMateria;
+        }
+    }
 
     // --- FUNÇÕES AUXILIARES DE TEMPO ---
     const timeToMin = (time) => { const [h, m] = time.split(':').map(Number); return h * 60 + m; };
     const minToTime = (min) => { const h = Math.floor(min / 60); const m = min % 60; return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`; };
 
-    // Gera os slots de 50 min pulando intervalos
+    // Gera os slots de 50 min pulando intervalos de forma robusta
     function gerarSlots(turnoKey) {
         const config = CONFIG[turnoKey];
         let atual = timeToMin(config.inicio);
         const fimDia = timeToMin(config.fim);
         const slots = [];
-        const duracaoAula = 50;
+        const duracaoAula = 50; // Duração da aula ajustada para 50 minutos para um encaixe perfeito nos horários
+
+        const intervalosEmMin = config.intervalos.map(inter => ({
+            inicio: timeToMin(inter.inicio),
+            fim: timeToMin(inter.fim),
+            original: inter
+        })).sort((a, b) => a.inicio - b.inicio);
 
         while (atual < fimDia) {
-            let colideIntervalo = false;
-            for (const inter of config.intervalos) {
-                const intIni = timeToMin(inter.inicio);
-                const intFim = timeToMin(inter.fim);
-                if (atual === intIni) {
-                    slots.push({ tipo: 'intervalo', inicio: inter.inicio, fim: inter.fim });
-                    atual = intFim;
-                    colideIntervalo = true;
-                    break;
-                }
+            const proximoIntervalo = intervalosEmMin.find(inter => inter.inicio >= atual);
+
+            // Se o tempo atual é exatamente o início de um intervalo, cria o slot de intervalo
+            if (proximoIntervalo && atual === proximoIntervalo.inicio) {
+                slots.push({ tipo: 'intervalo', inicio: proximoIntervalo.original.inicio, fim: proximoIntervalo.original.fim });
+                atual = proximoIntervalo.fim;
+                continue;
             }
 
-            if (colideIntervalo) continue;
-
             const fimAula = atual + duracaoAula;
-            if (fimAula > fimDia) break; // Não cria aula que ultrapassa o fim do turno
 
+            // Se a aula for ultrapassar o fim do turno, encerra.
+            if (fimAula > fimDia) {
+                break;
+            }
+
+            // Se a aula for entrar em conflito com o próximo intervalo, avança o tempo para o início desse intervalo.
+            if (proximoIntervalo && fimAula > proximoIntervalo.inicio) {
+                atual = proximoIntervalo.inicio;
+                continue;
+            }
+            
+            // Cria o slot de aula normal
             slots.push({ tipo: 'aula', inicio: minToTime(atual), fim: minToTime(fimAula) });
             atual = fimAula;
         }
@@ -336,27 +694,57 @@
     document.addEventListener('DOMContentLoaded', () => {
         const getEl = (id) => document.getElementById(id);
 
+        // Sincroniza abas diferentes do mesmo navegador em tempo real
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'sge_reservas') {
+                estado.reservas = loadReservas();
+                renderCalendar();
+            }
+        });
+
         // --- MANIPULADORES DE EVENTOS ---
         getEl('login-form').addEventListener('submit', (e) => {
             e.preventDefault();
-            getEl('login-screen').style.display = 'none';
-            getEl('app-screen').style.display = 'flex';
-            renderCalendar();
+            const cpfInput = getEl('cpf').value;
+            // Remove pontos e traços para validar apenas os números
+            const cpfLimpo = cpfInput.replace(/\D/g, '');
+            const senha = getEl('senha').value;
+            const user = USERS[cpfLimpo];
+
+            if (user && user.senha === senha) {
+                estado.usuarioLogado = user;
+                getEl('user-name').innerText = user.nome;
+
+                const isAdmin = user.role === 'direcao' || user.role === 'admin';
+                getEl('btn-admin').style.display = isAdmin ? 'flex' : 'none';
+
+                getEl('login-screen').style.display = 'none';
+                getEl('app-screen').style.display = 'flex';
+                renderCalendar();
+            } else {
+                alert("CPF ou senha incorretos.");
+            }
         });
 
         getEl('logout-btn').addEventListener('click', () => location.reload());
 
         document.querySelectorAll('#recursos-list li').forEach(item => {
             item.addEventListener('click', () => {
-                document.querySelector('#recursos-list li.active').classList.remove('active');
-                item.classList.add('active');
-                estado.recursoSelecionado = {
-                    id: item.dataset.id,
-                    nome: item.innerText.trim(),
-                    total: parseInt(item.dataset.total),
-                    hasMouse: item.dataset.hasMouse === "true"
-                };
-                renderCalendar();
+                // Apenas executa a lógica de recurso se o item tiver um 'data-id'
+                if (item.dataset.id) {
+                    const currentActive = document.querySelector('#recursos-list li.active');
+                    if (currentActive) {
+                        currentActive.classList.remove('active');
+                    }
+                    item.classList.add('active');
+                    estado.recursoSelecionado = {
+                        id: item.dataset.id,
+                        nome: item.innerText.trim(),
+                        total: parseInt(item.dataset.total),
+                        hasMouse: item.dataset.hasMouse === "true"
+                    };
+                    renderCalendar();
+                }
             });
         });
 
@@ -367,24 +755,120 @@
         getEl('next-month').addEventListener('click', () => { estado.dataAtual.setMonth(estado.dataAtual.getMonth() + 1); renderCalendar(); });
 
         getEl('btn-manutencao').addEventListener('click', () => getEl('modal-manutencao').style.display = 'flex');
+        getEl('btn-sala-tecnica').addEventListener('click', () => getEl('modal-sala-tecnica').style.display = 'flex');
+        getEl('btn-admin').addEventListener('click', () => {
+            const adminModal = getEl('modal-admin');
+            if (adminModal) {
+                renderAdminView();
+                adminModal.style.display = 'flex';
+            } else {
+                alert("Erro: A área da direção não pôde ser aberta. O elemento 'modal-admin' não foi encontrado.");
+            }
+        });
+
+        getEl('btn-novo-usuario').addEventListener('click', () => {
+            // Cadastro via Admin: Pode escolher a função
+            getEl('cad-role').style.display = 'block';
+            getEl('lbl-cad-role').style.display = 'block';
+            getEl('cad-role').value = 'professor'; // Reset valor padrão
+            getEl('modal-cadastro').style.display = 'flex';
+        });
+
+        // Botão para abrir o painel lateral no modal
+        getEl('btn-toggle-list').addEventListener('click', () => {
+            const content = getEl('reserva-content');
+            content.classList.toggle('expanded');
+            renderSidePanel();
+        });
+
+        // Busca de usuários
+        getEl('search-prof').addEventListener('keyup', (e) => {
+            renderAdminView(e.target.value.toLowerCase());
+        });
         
+        // Abas da Administração
+        document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.remove('active'));
+                btn.classList.add('active');
+                getEl(btn.dataset.target).classList.add('active');
+            });
+        });
+
         document.querySelectorAll('.modal .close').forEach(btn => {
             btn.addEventListener('click', () => {
-                getEl('modal-reserva').style.display = 'none';
-                getEl('modal-manutencao').style.display = 'none';
+                btn.closest('.modal').style.display = 'none';
+                // Fecha o painel lateral se estiver aberto
+                if(getEl('reserva-content')) getEl('reserva-content').classList.remove('expanded');
             });
         });
 
         getEl('form-reserva').addEventListener('submit', (e) => {
             e.preventDefault();
             const qtd = getEl('qtd-retirada').value;
-            alert(`Reserva para ${qtd} item(ns) confirmada!\nRecurso: ${estado.recursoSelecionado.nome}\nLembre-se de carregar os aparelhos!`);
+            const turma = getEl('res-turma').value;
             
             if (estado.slotClicado) {
-                estado.reservas.add(estado.slotClicado.idUnico);
+                const { idUnico, dia, mes, ano, hora } = estado.slotClicado;
+                const reservaInfo = {
+                    id: idUnico,
+                    recursoNome: estado.recursoSelecionado.nome,
+                    data: `${String(dia).padStart(2, '0')}/${String(mes + 1).padStart(2, '0')}/${ano}`,
+                    hora: hora,
+                    turma: turma,
+                    qtd: qtd,
+                    professor: estado.usuarioLogado.nome
+                };
+                estado.reservas.set(idUnico, reservaInfo);
+                saveReservas(); // Salva no localStorage
+                alert(`Reserva para ${qtd} item(ns) confirmada!\nRecurso: ${estado.recursoSelecionado.nome}\nLembre-se de carregar os aparelhos!`);
                 renderCalendar();
             }
             getEl('modal-reserva').style.display = 'none';
+        });
+
+        getEl('form-manutencao').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const equipamento = getEl('manut-equipamento').value;
+            const descricao = getEl('manut-descricao').value;
+
+            const problema = {
+                id: `prob-${Date.now()}`, // ID único para o problema
+                equipamento,
+                descricao,
+                data: new Date().toLocaleString('pt-BR'),
+                previsao: 'A definir',
+                status: 'Aberto', // Status para gerenciamento futuro
+                reportadoPor: estado.usuarioLogado.nome
+            };
+            estado.problemas.push(problema);
+
+            alert('Relatório de manutenção enviado para a gestão!');
+            e.target.reset();
+            getEl('modal-manutencao').style.display = 'none';
+        });
+
+        // Submit Cadastro Usuário
+        getEl('form-cadastro').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const nome = getEl('cad-nome').value;
+            const cpf = getEl('cad-cpf').value.replace(/\D/g, ''); // Remove não números
+            const senha = getEl('cad-senha').value;
+            const role = getEl('cad-role').value;
+
+            if (USERS[cpf]) {
+                alert('Erro: CPF já cadastrado!');
+                return;
+            }
+
+            USERS[cpf] = { nome, senha, role };
+            saveUsers(); // Salva no localStorage
+            alert('Usuário cadastrado com sucesso!');
+            
+            getEl('form-cadastro').reset();
+            getEl('modal-cadastro').style.display = 'none';
+            renderAdminView(); // Atualiza a lista na tela admin
         });
 
         // --- FUNÇÕES DE RENDERIZAÇÃO ---
@@ -404,10 +888,20 @@
             
             getEl('current-month').innerText = new Date(ano, mes).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
 
-            const primeiroDiaSemana = new Date(ano, mes, 1).getDay();
+            const primeiroDiaDoMes = new Date(ano, mes, 1);
             const diasNoMes = new Date(ano, mes + 1, 0).getDate();
 
-            for (let i = 0; i < primeiroDiaSemana; i++) {
+            // getDay() original: 0=Dom, 1=Seg, ..., 6=Sab
+            let diaSemanaInicio = primeiroDiaDoMes.getDay();
+
+            // Se o mês começa no Sábado (6) ou Domingo (0), não precisamos de padding.
+            // O primeiro dia útil (segunda) vai naturalmente se alinhar no início.
+            let padding = 0;
+            if (diaSemanaInicio > 0 && diaSemanaInicio < 6) { // Se for de Seg a Sex
+                padding = diaSemanaInicio - 1; // 1(Seg) -> 0 padding, 5(Sex) -> 4 padding
+            }
+
+            for (let i = 0; i < padding; i++) {
                 const cell = document.createElement('div');
                 cell.className = 'day-cell other-month';
                 grid.appendChild(cell);
@@ -416,6 +910,14 @@
             const slotsDoTurno = gerarSlots(estado.turnoAtual);
 
             for (let dia = 1; dia <= diasNoMes; dia++) {
+                const dataAtualLoop = new Date(ano, mes, dia);
+                const diaDaSemana = dataAtualLoop.getDay();
+
+                // Pula Sábados (6) e Domingos (0)
+                if (diaDaSemana === 0 || diaDaSemana === 6) {
+                    continue;
+                }
+
                 const cell = document.createElement('div');
                 cell.className = 'day-cell';
                 cell.innerHTML = `<span class="day-number">${dia}</span>`;
@@ -427,14 +929,17 @@
                     const divSlot = document.createElement('div');
                     divSlot.innerText = `${slot.inicio} - ${slot.fim}`;
                     divSlot.className = `slot ${slot.tipo === 'intervalo' ? 'intervalo' : 'livre'}`;
-                    
                     const idUnico = `${dia}-${mes}-${ano}-${slot.inicio}-${estado.recursoSelecionado.id}`;
 
                     if (slot.tipo === 'aula') {
-                        if (estado.reservas.has(idUnico)) {
-                            divSlot.classList.replace('livre', 'ocupado');
-                            divSlot.title = "Reservado";
+                        if (estado.reservas.has(idUnico)) { 
+                            const reserva = estado.reservas.get(idUnico);
+                            divSlot.classList.replace('livre', 'ocupado'); 
+                            // Mostra a turma e muda o title para detalhes completos
+                            divSlot.innerHTML = `<span style="font-size:0.75rem">${slot.inicio}</span><br><strong>${reserva.turma || 'Reservado'}</strong>`;
+                            divSlot.title = `Prof: ${reserva.professor}\nTurma: ${reserva.turma}\nQtd: ${reserva.qtd}`; 
                         } else {
+                            // Se estiver livre, mantém o padrão
                             divSlot.onclick = () => abrirModalReserva(dia, mes, ano, slot.inicio, idUnico);
                         }
                     }
@@ -446,8 +951,8 @@
         }
 
         function abrirModalReserva(dia, mes, ano, hora, idUnico) {
-            estado.slotClicado = { idUnico };
-            
+            estado.slotClicado = { idUnico, dia, mes, ano, hora };
+
             getEl('res-recurso').innerText = estado.recursoSelecionado.nome;
             getEl('res-data').innerText = `${String(dia).padStart(2, '0')}/${String(mes + 1).padStart(2, '0')}/${ano}`;
             getEl('res-hora').innerText = hora;
@@ -455,10 +960,117 @@
             const qtdInput = getEl('qtd-retirada');
             qtdInput.max = estado.recursoSelecionado.total;
             qtdInput.value = estado.recursoSelecionado.total;
+            
+            // --- LÓGICA DE SUGESTÃO DE AULA ---
+            const inputTurma = getEl('res-turma');
+            const infoBox = getEl('aula-sugerida-box');
+            const infoTexto = getEl('aula-sugerida-texto');
+            
+            inputTurma.value = ''; // Limpa inicialmente
+            infoBox.style.display = 'none';
+            
+            // Reseta seleção visual do painel lateral
+            selTurma = ""; selMateria = "";
+            document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('selected'));
+            if(getEl('reserva-content')) getEl('reserva-content').classList.remove('expanded');
+
+            // Verifica na grade se tem aula
+            const dataClique = new Date(ano, mes, dia);
+            const diaSemana = dataClique.getDay(); // 0-6
+            const nomeProf = estado.usuarioLogado.nome;
+            
+            if (MOCK_HORARIOS[nomeProf] && MOCK_HORARIOS[nomeProf][diaSemana]) {
+                const aulaEncontrada = MOCK_HORARIOS[nomeProf][diaSemana].find(a => a.hora === hora);
+                
+                if (aulaEncontrada) {
+                    const textoAula = `${aulaEncontrada.turma} - ${aulaEncontrada.mat}`;
+                    inputTurma.value = textoAula; // Preenche automático
+                    infoTexto.innerText = textoAula;
+                    infoBox.style.display = 'block'; // Mostra o box azul
+                }
+            }
 
             getEl('mouse-check-group').style.display = estado.recursoSelecionado.hasMouse ? 'block' : 'none';
             
             getEl('modal-reserva').style.display = 'flex';
+        }
+
+        function renderAdminView(filter = '') {
+            const problemasEl = getEl('admin-problemas-list');
+            const usersEl = getEl('admin-users-list');
+            const pendenciasEl = getEl('admin-pendencias-list');
+            
+            // 1. Renderiza problemas (Manutenção) em Tabela
+            problemasEl.innerHTML = ''; 
+            if (estado.problemas.length === 0) {
+                problemasEl.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">Nenhum equipamento em manutenção.</td></tr>';
+            } else {
+                for (const problema of [...estado.problemas].reverse()) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><strong>${problema.equipamento}</strong></td>
+                        <td>${problema.descricao}</td>
+                        <td>${problema.data}</td>
+                        <td><span class="status-badge erro">${problema.previsao}</span></td>
+                        <td>
+                            <button class="action-btn btn-resolve" onclick="this.closest('tr').remove(); alert('Manutenção concluída para ${problema.equipamento}');">
+                                <i class="fa-solid fa-check"></i> Concluir
+                            </button>
+                        </td>
+                    `;
+                    problemasEl.appendChild(row);
+                }
+            }
+
+            // 2. Renderiza Lista de Usuários (Tabela com Filtro)
+            usersEl.innerHTML = '';
+            const cpfs = Object.keys(USERS);
+            const filtrados = cpfs.filter(cpf => 
+                USERS[cpf].nome.toLowerCase().includes(filter) || cpf.includes(filter)
+            );
+
+            if (filtrados.length === 0) {
+                usersEl.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:15px;">Nenhum usuário encontrado.</td></tr>';
+            } else {
+                filtrados.forEach(cpf => {
+                    const u = USERS[cpf];
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${u.nome}</td>
+                        <td>${cpf}</td>
+                        <td><span class="status-badge ${u.role === 'admin' || u.role === 'direcao' ? 'pendente' : 'ok'}">${u.role}</span></td>
+                        <td>
+                             <button class="action-btn" title="Editar"><i class="fa-solid fa-pen"></i></button>
+                             <button class="action-btn btn-delete" title="Remover"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    `;
+                    usersEl.appendChild(tr);
+                });
+            }
+
+            // 4. Renderiza Pendências (Cards de Alerta)
+            pendenciasEl.innerHTML = '';
+            getEl('badge-pend').style.display = estado.pendencias.length > 0 ? 'inline-block' : 'none';
+            getEl('badge-pend').innerText = estado.pendencias.length;
+
+            if (estado.pendencias.length === 0) {
+                pendenciasEl.innerHTML = '<p style="text-align: center; color: #777;">Nenhuma pendência encontrada.</p>';
+            } else {
+                estado.pendencias.forEach(p => {
+                    const pCard = document.createElement('div');
+                    pCard.className = 'pending-card';
+                    pCard.innerHTML = `
+                        <div class="pending-info">
+                            <h5>${p.nome} <span style="font-weight:normal; font-size:0.8rem; color:#777;">(CPF: ${p.cpf})</span></h5>
+                            <p><i class="fa-solid fa-circle-exclamation" style="color:var(--yellow-warn);"></i> ${p.obs} - Desde: ${p.data}</p>
+                        </div>
+                        <button class="action-btn btn-approve" onclick="alert('Cadastro de ${p.nome} aprovado!'); this.parentElement.remove();">
+                            <i class="fa-solid fa-check"></i> Aprovar
+                        </button>
+                    `;
+                    pendenciasEl.appendChild(pCard);
+                });
+            }
         }
 
         // Inicializa a aplicação
