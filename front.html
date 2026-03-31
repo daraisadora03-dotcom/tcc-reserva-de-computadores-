@@ -10,7 +10,7 @@
     <style>
         /* --- ESTILOS GERAIS (CSS) --- */
         :root {
-            --primary: #005A9C; /* Azul institucional */
+            --primary: #8FB06B; /* Verde institucional */
             --secondary: #3498db;
             --accent: #e74c3c; /* Vermelho para alertas/logout */
             --bg: #f4f7f6;
@@ -27,7 +27,7 @@
         /* --- TELA DE LOGIN --- */
         .login-container {
             display: flex; justify-content: center; align-items: center; height: 100vh;
-            background: linear-gradient(135deg, var(--primary), #2980b9);
+            background: linear-gradient(to bottom, #a4b494, #dbe7d5, #ffffff);
         }
         .login-box {
             background: white; padding: 2.5rem; border-radius: 10px; width: 90%; max-width: 400px;
@@ -38,10 +38,10 @@
         .input-group label { font-weight: 600; font-size: 0.9rem; margin-bottom: 5px; display: block; }
         .input-group input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; font-size: 1rem; }
         .login-box button {
-            width: 100%; padding: 12px; background: var(--secondary); color: white; border: none;
+            width: 100%; padding: 12px; background: var(--primary); color: white; border: none;
             border-radius: 5px; cursor: pointer; font-size: 1.1rem; font-weight: 600; transition: 0.3s; margin-top: 1rem;
         }
-        .login-box button:hover { background: #2980b9; transform: translateY(-2px); }
+        .login-box button:hover { background: #799454; transform: translateY(-2px); }
 
         .note { font-size: 0.8rem; color: #777; margin-top: 1rem; }
 
@@ -50,20 +50,21 @@
 
         /* --- MENU LATERAL (SIDEBAR) --- */
         .sidebar {
-            width: 260px; background: white; border-right: 1px solid var(--border-light);
+            width: 260px; background: var(--primary); border-right: 1px solid var(--border-light);
             display: flex; flex-direction: column; padding: 1.5rem 1rem;
+            color: white;
         }
-        .logo-area { margin-bottom: 2rem; color: var(--primary); text-align: center; }
+        .logo-area { margin-bottom: 2rem; color: white; text-align: center; }
         .logo-area h3 { font-size: 1.5rem; }
-        .logo-area p { font-size: 0.9rem; color: #555; }
-        .menu-title { font-size: 0.8rem; text-transform: uppercase; color: #888; margin: 1.5rem 0 0.5rem; font-weight: 600; }
+        .logo-area p { font-size: 0.9rem; color: #f0f0f0; }
+        .menu-title { font-size: 0.8rem; text-transform: uppercase; color: #f0f0f0; margin: 1.5rem 0 0.5rem; font-weight: 600; }
         .sidebar ul { list-style: none; }
         .sidebar li {
-            padding: 12px; cursor: pointer; border-radius: 6px; color: #444; margin-bottom: 5px;
+            padding: 12px; cursor: pointer; border-radius: 6px; color: white; margin-bottom: 5px;
             display: flex; align-items: center; gap: 12px; font-weight: 500; transition: all 0.2s ease-in-out;
         }
-        .sidebar li:hover { background: #f0f4f8; color: var(--primary); }
-        .sidebar li.active { background: var(--primary); color: white; }
+        .sidebar li:hover { background: #799454; color: white; }
+        .sidebar li.active { background: white; color: var(--primary); }
         .user-profile { margin-top: auto; border-top: 1px solid var(--border-light); padding-top: 1rem; text-align: center; }
         #user-name { font-weight: 600; }
         #logout-btn { background: var(--accent); color: white; width: 100%; padding: 10px; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px; }
@@ -212,7 +213,9 @@
                 </div>
                 <button type="submit">Entrar</button>
             </form>
-            <p class="note">Cadastro inicial deve ser feito na secretaria.</p>
+            <p class="note" style="margin-top: 1rem; border-top: 1px solid #eee; padding-top: 1rem;">
+                Ainda não tem uma conta? <a href="#" id="link-auto-cadastro" style="color: #8FB06B; font-weight: bold; text-decoration: none;">Cadastre-se aqui</a>
+            </p>
         </div>
     </div>
 
@@ -496,12 +499,16 @@
                     <input type="text" id="cad-nome" required>
                 </div>
                 <div class="input-group">
+                    <label>Email Institucional</label>
+                    <input type="email" id="cad-email" placeholder="professor@educacao.sp.gov.br" required>
+                </div>
+                <div class="input-group">
                     <label>CPF (Apenas números)</label>
                     <input type="text" id="cad-cpf" placeholder="Somente números" maxlength="11" required>
                 </div>
                 <div class="input-group">
                     <label>Senha</label>
-                    <input type="text" id="cad-senha" required>
+                    <input type="password" id="cad-senha" required>
                 </div>
                 <div class="input-group">
                     <label id="lbl-cad-role">Função</label>
@@ -726,6 +733,15 @@
             }
         });
 
+        getEl('link-auto-cadastro').addEventListener('click', (e) => {
+            e.preventDefault();
+            // Configura o modal para auto-cadastro (esconde a escolha de função por segurança)
+            getEl('cad-role').style.display = 'none';
+            getEl('lbl-cad-role').style.display = 'none';
+            getEl('cad-role').value = 'professor';
+            getEl('modal-cadastro').style.display = 'flex';
+        });
+
         getEl('logout-btn').addEventListener('click', () => location.reload());
 
         document.querySelectorAll('#recursos-list li').forEach(item => {
@@ -853,6 +869,7 @@
         getEl('form-cadastro').addEventListener('submit', (e) => {
             e.preventDefault();
             const nome = getEl('cad-nome').value;
+            const email = getEl('cad-email').value;
             const cpf = getEl('cad-cpf').value.replace(/\D/g, ''); // Remove não números
             const senha = getEl('cad-senha').value;
             const role = getEl('cad-role').value;
@@ -862,7 +879,7 @@
                 return;
             }
 
-            USERS[cpf] = { nome, senha, role };
+            USERS[cpf] = { nome, email, senha, role };
             saveUsers(); // Salva no localStorage
             alert('Usuário cadastrado com sucesso!');
             
@@ -1079,499 +1096,6 @@
     </script>
 </body>
 </html>
-=======
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SGE - Reserva de Equipamentos</title>
-    <!-- Importando Ícones (Font Awesome) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <style>
-        /* --- ESTILOS GERAIS (CSS) --- */
-        :root {
-            --primary: #005A9C; /* Azul institucional */
-            --secondary: #3498db;
-            --accent: #e74c3c; /* Vermelho para alertas/logout */
-            --bg: #f4f7f6;
-            --text: #333;
-            --green-ok: #27ae60;
-            --yellow-warn: #f39c12;
-            --border-light: #ecf0f1;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-
-        body { background-color: var(--bg); height: 100vh; display: flex; flex-direction: column; color: var(--text); }
-
-        /* --- TELA DE LOGIN --- */
-        .login-container {
-            display: flex; justify-content: center; align-items: center; height: 100vh;
-            background: linear-gradient(to bottom, #a4b494, #dbe7d5, #ffffff);
-        }
-        .login-box {
-            background: white; padding: 2.5rem; border-radius: 10px; width: 90%; max-width: 400px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2); text-align: center;
-        }
-        .login-box h2 { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 2rem; color: #8FB06B; }
-        .input-group { margin-bottom: 1.2rem; text-align: left; }
-        .input-group label { font-weight: 600; font-size: 0.9rem; margin-bottom: 5px; display: block; }
-        .input-group input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; font-size: 1rem; }
-        .login-box button {
-            width: 100%; padding: 12px; background: #8FB06B; color: white; border: none;
-            border-radius: 5px; cursor: pointer; font-size: 1.1rem; font-weight: 600; transition: 0.3s; margin-top: 1rem;
-        }
-        .login-box button:hover { background: #799454; transform: translateY(-2px); }
-        .note { font-size: 0.8rem; color: #777; margin-top: 1rem; }
-
-        /* --- LAYOUT DA APLICAÇÃO --- */
-        .app-container { display: flex; height: 100vh; }
-
-        /* --- MENU LATERAL (SIDEBAR) --- */
-        .sidebar {
-            width: 260px; background: #8FB06B; border-right: 1px solid var(--border-light);
-            display: flex; flex-direction: column; padding: 1.5rem 1rem;
-            color: white;
-        }
-        .logo-area { margin-bottom: 2rem; color: white; text-align: center; }
-        .logo-area h3 { font-size: 1.5rem; }
-        .logo-area p { font-size: 0.9rem; color: #e0e0e0; }
-        .menu-title { font-size: 0.8rem; text-transform: uppercase; color: #f0f0f0; margin: 1.5rem 0 0.5rem; font-weight: 600; }
-        .sidebar ul { list-style: none; }
-        .sidebar li {
-            padding: 12px; cursor: pointer; border-radius: 6px; color: white; margin-bottom: 5px;
-            display: flex; align-items: center; gap: 12px; font-weight: 500; transition: all 0.2s ease-in-out;
-        }
-        .sidebar li:hover { background: #799454; color: white; }
-        .sidebar li.active { background: white; color: #8FB06B; }
-        .user-profile { margin-top: auto; border-top: 1px solid var(--border-light); padding-top: 1rem; text-align: center; }
-        #user-name { font-weight: 600; }
-        #logout-btn { background: var(--accent); color: white; width: 100%; padding: 10px; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px; }
-
-        /* --- CONTEÚDO PRINCIPAL --- */
-        .content {
-            flex: 1;
-            padding: 2rem;
-            overflow-y: auto;
-            background: linear-gradient(to bottom, #a4b494, #dbe7d5, #ffffff);
-        }
-        .content header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
-        .content header h2 { color: #8FB06B; }
-        .filters { display: flex; gap: 10px; }
-        .filter-btn { background: white; color: var(--text); border: 1px solid #ccc; width: auto; padding: 8px 15px; border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 500; }
-        .filter-btn.active { background: #8FB06B; color: white; border-color: #8FB06B; }
-
-        /* --- CALENDÁRIO --- */
-        .calendar-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-        .calendar-controls h3 { color: #8FB06B; }
-        .calendar-controls button { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #8FB06B; }
-        .calendar-controls button:hover { color: #799454; }
-        .calendar-grid-header { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-weight: bold; margin-bottom: 10px; color: #8FB06B; }
-        .calendar-body { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
-
-        .day-cell {
-            background: white; min-height: 120px; padding: 10px; border-radius: 8px; border: 1px solid var(--border-light);
-            transition: box-shadow 0.2s;
-        }
-        .day-cell.other-month { background: #f9fafb; }
-        .day-cell:hover { box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
-        .day-number { font-weight: bold; margin-bottom: 5px; display: block; color: #8FB06B; }
-        .day-cell.other-month .day-number { color: #ccc; }
-        .slots-container { display: flex; flex-direction: column; gap: 4px; }
-        .slot {
-            font-size: 0.75rem; padding: 4px; border-radius: 4px; text-align: center; cursor: pointer; font-weight: 500;
-            transition: transform 0.2s;
-        }
-        .slot:hover { transform: scale(1.05); }
-        .slot.livre { background: #F0F3E5; color: #8FB06B; border: 1px solid #E0E6D2; }
-        .slot.ocupado { background: #c0392b; color: white; border: 1px solid #922b21; cursor: not-allowed; font-weight: 600; }
-        .slot.intervalo { background: #e2e3e5; color: #383d41; border: 1px solid #d6d8db; cursor: default; }
-        .legend { display: flex; justify-content: flex-end; gap: 15px; margin-top: 1.5rem; }
-        .badge { padding: 5px 10px; border-radius: 15px; font-size: 0.8rem; }
-
-        /* --- JANELAS MODAIS --- */
-        .modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000;
-        }
-        .modal-content { background: white; padding: 2rem; border-radius: 8px; width: 90%; max-width: 450px; position: relative; }
-        .modal-content h3 { margin-bottom: 1.5rem; color: var(--primary); }
-        .close { position: absolute; top: 10px; right: 15px; font-size: 1.8rem; cursor: pointer; color: #aaa; }
-        .modal-info p { margin-bottom: 10px; }
-        .alert-box {
-            background: #fff3cd; color: #856404; padding: 15px; border-radius: 5px; margin: 20px 0;
-            font-size: 0.9rem; display: flex; gap: 10px; align-items: center; border-left: 5px solid var(--yellow-warn);
-        }
-        .btn-confirm {
-            width: 100%; padding: 12px; background: var(--green-ok); color: white; border: none;
-            border-radius: 5px; cursor: pointer; font-size: 1rem; font-weight: 600; margin-top: 1rem;
-        }
-    </style>
-</head>
-<body>
-
-    <!-- TELA DE LOGIN -->
-    <div id="login-screen" class="login-container">
-        <div class="login-box">
-            <h2><i class="fa-solid fa-school"></i> Acesso Professores</h2>
-            <form id="login-form">
-                <div class="input-group">
-                    <label for="cpf">CPF</label>
-                    <input type="text" id="cpf" placeholder="000.000.000-00" required>
-                </div>
-                <div class="input-group">
-                    <label for="senha">Senha</label>
-                    <input type="password" id="senha" placeholder="********" required>
-                </div>
-                <button type="submit">Entrar</button>
-            </form>
-            <p class="note">Cadastro inicial deve ser feito na secretaria.</p>
-        </div>
-    </div>
-
-    <!-- SISTEMA PRINCIPAL (Inicialmente oculto) -->
-    <div id="app-screen" class="app-container" style="display: none;">
-        
-        <!-- Menu Lateral -->
-        <aside class="sidebar">
-            <div class="logo-area">
-                <h3>Gestão Escolar</h3>
-                <p>Reserva de TI</p>
-            </div>
-            
-            <nav>
-                <p class="menu-title">Recursos Disponíveis</p>
-                <ul id="recursos-list">
-                    <li class="active" data-id="c1" data-total="40" data-has-mouse="false">
-                        <i class="fa-solid fa-laptop"></i> Carrinho 1 (40 Nots)
-                    </li>
-                    <li data-id="c2" data-total="40" data-has-mouse="true">
-                        <i class="fa-solid fa-laptop"></i> Carrinho 2 (+Mouses)
-                    </li>
-                    <li data-id="c3" data-total="40" data-has-mouse="false">
-                        <i class="fa-solid fa-tablet-screen-button"></i> Carrinho 3 (Tablets)
-                    </li>
-                    <li data-id="lab" data-total="15" data-has-mouse="false">
-                        <i class="fa-solid fa-desktop"></i> Lab. Acessa (~15 PCs)
-                    </li>
-                    <li data-id="tec" data-total="5" data-has-mouse="false">
-                        <i class="fa-solid fa-screwdriver-wrench"></i> Nots do Técnico
-                    </li>
-                </ul>
-
-                <p class="menu-title">Gestão</p>
-                <ul>
-                    <li id="btn-manutencao"><i class="fa-solid fa-triangle-exclamation"></i> Reportar Problema</li>
-                    <li id="btn-admin"><i class="fa-solid fa-user-tie"></i> Área da Direção</li>
-                </ul>
-            </nav>
-
-            <div class="user-profile">
-                <span id="user-name">Prof. Visitante</span>
-                <button id="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Sair</button>
-            </div>
-        </aside>
-
-        <!-- Conteúdo Principal -->
-        <main class="content">
-            <header>
-                <h2>Calendário de Reservas</h2>
-                <div class="filters">
-                    <button class="filter-btn active" id="btn-fundamental">
-                        <i class="fa-solid fa-child"></i> Fundamental
-                    </button>
-                    <button class="filter-btn" id="btn-medio">
-                        <i class="fa-solid fa-graduation-cap"></i> Médio
-                    </button>
-                </div>
-            </header>
-
-            <div class="calendar-controls">
-                <button id="prev-month"><i class="fa-solid fa-chevron-left"></i></button>
-                <h3 id="current-month">Mês Ano</h3>
-                <button id="next-month"><i class="fa-solid fa-chevron-right"></i></button>
-            </div>
-
-            <div class="calendar-grid-header">
-                <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
-            </div>
-            <div id="calendar-body" class="calendar-body">
-                <!-- Dias e horários serão gerados pelo JavaScript -->
-            </div>
-            
-            <div class="legend">
-                <span class="badge livre" style="background: #F0F3E5; color: #8FB06B;">Livre</span>
-                <span class="badge ocupado" style="background: #c0392b; color: white;">Ocupado</span>
-                <span class="badge intervalo" style="background: #e2e3e5; color: #383d41;">Intervalo</span>
-            </div>
-        </main>
-    </div>
-
-    <!-- MODAL DE RESERVA -->
-    <div id="modal-reserva" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h3>Nova Reserva</h3>
-            <div class="modal-info">
-                <p><strong>Recurso:</strong> <span id="res-recurso"></span></p>
-                <p><strong>Data:</strong> <span id="res-data"></span></p>
-                <p><strong>Horário:</strong> <span id="res-hora"></span></p>
-            </div>
-
-            <form id="form-reserva">
-                <div class="input-group">
-                    <label for="qtd-retirada">Quantidade a Retirar:</label>
-                    <input type="number" id="qtd-retirada" min="1" value="40">
-                </div>
-                
-                <div id="mouse-check-group" style="display:none;" class="input-group">
-                    <label><i class="fa-solid fa-computer-mouse"></i> Relatar problema com mouses?</label>
-                    <select id="mouse-status" class="input-group input">
-                        <option value="ok">Não, todos funcionando</option>
-                        <option value="problema">Sim, alguns com defeito</option>
-                    </select>
-                </div>
-
-                <div class="alert-box">
-                    <i class="fa-solid fa-battery-full fa-2x"></i>
-                    <strong>ATENÇÃO:</strong> Ao devolver, coloque todos os equipamentos para carregar imediatamente!
-                </div>
-
-                <button type="submit" class="btn-confirm">Confirmar Reserva</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL DE MANUTENÇÃO -->
-    <div id="modal-manutencao" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h3>Reportar Problema</h3>
-            <form>
-                <div class="input-group">
-                    <label>Equipamento:</label>
-                    <input type="text" placeholder="Ex: Notebook #12 - Carrinho 1">
-                </div>
-                <div class="input-group">
-                    <label>Descrição do defeito:</label>
-                    <textarea rows="3" placeholder="Ex: A tela não liga, teclado com tecla 'A' falhando."></textarea>
-                </div>
-                <button type="button" class="btn-confirm" onclick="alert('Relatório de manutenção enviado para a gestão!')">Enviar Reporte</button>
-            </form>
-        </div>
-    </div>
-
-    <script>
-    // --- LÓGICA DO SISTEMA (JAVASCRIPT) ---
-
-    // --- CONFIGURAÇÕES DE HORÁRIOS ---
-    const CONFIG = {
-        fundamental: {
-            inicio: "07:00", fim: "14:00",
-            intervalos: [{ inicio: "09:30", fim: "09:50" }, { inicio: "11:30", fim: "12:20" }]
-        },
-        medio: {
-            inicio: "14:15", fim: "21:15",
-            intervalos: [{ inicio: "15:55", fim: "16:15" }, { inicio: "18:45", fim: "19:35" }]
-        }
-    };
-
-    // --- ESTADO GLOBAL DA APLICAÇÃO ---
-    let estado = {
-        turnoAtual: 'fundamental',
-        recursoSelecionado: { id: 'c1', nome: 'Carrinho 1 (40 Nots)', total: 40, hasMouse: false },
-        dataAtual: new Date(),
-        reservas: new Set() // Usamos um Set para performance e evitar duplicados
-    };
-
-    // --- FUNÇÕES AUXILIARES DE TEMPO ---
-    const timeToMin = (time) => { const [h, m] = time.split(':').map(Number); return h * 60 + m; };
-    const minToTime = (min) => { const h = Math.floor(min / 60); const m = min % 60; return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`; };
-
-    // Gera os slots de 50 min pulando intervalos
-    function gerarSlots(turnoKey) {
-        const config = CONFIG[turnoKey];
-        let atual = timeToMin(config.inicio);
-        const fimDia = timeToMin(config.fim);
-        const slots = [];
-        const duracaoAula = 50;
-
-        while (atual < fimDia) {
-            let colideIntervalo = false;
-            for (const inter of config.intervalos) {
-                const intIni = timeToMin(inter.inicio);
-                const intFim = timeToMin(inter.fim);
-                if (atual === intIni) {
-                    slots.push({ tipo: 'intervalo', inicio: inter.inicio, fim: inter.fim });
-                    atual = intFim;
-                    colideIntervalo = true;
-                    break;
-                }
-            }
-
-            if (colideIntervalo) continue;
-
-            const fimAula = atual + duracaoAula;
-            if (fimAula > fimDia) break; // Não cria aula que ultrapassa o fim do turno
-
-            slots.push({ tipo: 'aula', inicio: minToTime(atual), fim: minToTime(fimAula) });
-            atual = fimAula;
-        }
-        return slots;
-    }
-
-    // --- LÓGICA DA INTERFACE DO USUÁRIO ---
-    document.addEventListener('DOMContentLoaded', () => {
-        const getEl = (id) => document.getElementById(id);
-
-        // --- MANIPULADORES DE EVENTOS ---
-        getEl('login-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            getEl('login-screen').style.display = 'none';
-            getEl('app-screen').style.display = 'flex';
-            renderCalendar();
-        });
-
-        getEl('logout-btn').addEventListener('click', () => location.reload());
-
-        document.querySelectorAll('#recursos-list li').forEach(item => {
-            item.addEventListener('click', () => {
-                document.querySelector('#recursos-list li.active').classList.remove('active');
-                item.classList.add('active');
-                estado.recursoSelecionado = {
-                    id: item.dataset.id,
-                    nome: item.innerText.trim(),
-                    total: parseInt(item.dataset.total),
-                    hasMouse: item.dataset.hasMouse === "true"
-                };
-                renderCalendar();
-            });
-        });
-
-        getEl('btn-fundamental').addEventListener('click', () => setTurno('fundamental'));
-        getEl('btn-medio').addEventListener('click', () => setTurno('medio'));
-
-        getEl('prev-month').addEventListener('click', () => { estado.dataAtual.setMonth(estado.dataAtual.getMonth() - 1); renderCalendar(); });
-        getEl('next-month').addEventListener('click', () => { estado.dataAtual.setMonth(estado.dataAtual.getMonth() + 1); renderCalendar(); });
-
-        getEl('btn-manutencao').addEventListener('click', () => getEl('modal-manutencao').style.display = 'flex');
-        
-        document.querySelectorAll('.modal .close').forEach(btn => {
-            btn.addEventListener('click', () => {
-                getEl('modal-reserva').style.display = 'none';
-                getEl('modal-manutencao').style.display = 'none';
-            });
-        });
-
-        getEl('form-reserva').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const qtd = getEl('qtd-retirada').value;
-            alert(`Reserva para ${qtd} item(ns) confirmada!\nRecurso: ${estado.recursoSelecionado.nome}\nLembre-se de carregar os aparelhos!`);
-            
-            if (estado.slotClicado) {
-                estado.reservas.add(estado.slotClicado.idUnico);
-                renderCalendar();
-            }
-            getEl('modal-reserva').style.display = 'none';
-        });
-
-        // --- FUNÇÕES DE RENDERIZAÇÃO ---
-        function setTurno(turno) {
-            estado.turnoAtual = turno;
-            getEl('btn-fundamental').classList.toggle('active', turno === 'fundamental');
-            getEl('btn-medio').classList.toggle('active', turno === 'medio');
-            renderCalendar();
-        }
-
-        function renderCalendar() {
-            const grid = getEl('calendar-body');
-            grid.innerHTML = '';
-            
-            const ano = estado.dataAtual.getFullYear();
-            const mes = estado.dataAtual.getMonth();
-            
-            getEl('current-month').innerText = new Date(ano, mes).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-
-            const primeiroDiaSemana = new Date(ano, mes, 1).getDay();
-            const diasNoMes = new Date(ano, mes + 1, 0).getDate();
-
-            for (let i = 0; i < primeiroDiaSemana; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'day-cell other-month';
-                grid.appendChild(cell);
-            }
-
-            const slotsDoTurno = gerarSlots(estadear();
-            const mes = estado.dataAtual.getMonth();
-            
-            getEl('current-month').innerText = new Date(ano, mes).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-
-            const primeiroDiaSemana = new Date(ano, mes, 1).getDay();
-            const diasNoMes = new Date(ano, mes + 1, 0).getDate();
-
-            for (let i = 0; i < primeiroDiaSemana; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'day-cell other-month';
-                grid.appendChild(cell);
-            }
-
-            const slotsDoTurno = gerarSlots(estado.turnoAtual);
-
-            for (let dia = 1; dia <= diasNoMes; dia++) {
-                const cell = document.createElement('div');
-                cell.className = 'day-cell';
-                cell.innerHTML = `<span class="day-number">${dia}</span>`;
-                
-                const slotsContainer = document.createElement('div');
-                slotsContainer.className = 'slots-container';
-
-                slotsDoTurno.forEach(slot => {
-                    const divSlot = document.createElement('div');
-                    divSlot.innerText = `${slot.inicio} - ${slot.fim}`;
-                    divSlot.className = `slot ${slot.tipo === 'intervalo' ? 'intervalo' : 'livre'}`;
-                    
-                    const idUnico = `${dia}-${mos}-${.no}-${slot.inicio}-${estado.tecursoSelecionado.id}`;
-
-                    if uslot.tipo === 'aula'r {
-                        if (estado.reservas.has(idUnico)) {
-                            divSlot.classList.replace('livre', 'ocupado');
-                            divSlot.title = "Reservado"n
-                        } else {
-                            divSlot.onclick = () => abrirModalReserva(dia, mes, ano, slot.inicio, idUnico);
-                        }
-                    }
-                    slotsContainer.appendChild(divSlot);
-                });
-                cell.appendChild(slotsContainer);
-                grid.appendChild(cell);
-            }
-        }
-
-        function abrirModalReserva(dia, mes, ano, hora, idUnico) {
-            estado.slotClicado = { idUnico };
-            
-            getEl('res-recurso').innerText = estado.recursoSelecionado.nome;
-            getEl('res-data').innerText = `${String(dia).padStart(2, '0')}/${String(mes + 1).padStart(2, '0')}/${ano}`;
-            getEl('res-hora').innerText = hora;
-            
-            const qtdInput = getEl('qtd-retirada');
-            qtdInput.max = estado.recursoSelecionado.total;
-            qtdInput.value = estado.recursoSelecionado.total;
-
-            getEl('mouse-check-group').style.display = estado.recursoSelecionado.hasMouse ? 'block' : 'none';
-            
-            getEl('modal-reserva').style.display = 'flex';
-        }
-
-        // Inicializa a aplicação
-        // A renderização inicial acontece após o login.
-    });
-    </script>
-</body>
-</html>
->>>>>>> 08ddf79 (alterado cores do sistema)oAtual);
 
             for (let dia = 1; dia <= diasNoMes; dia++) {
                 const cell = document.createElement('div');
