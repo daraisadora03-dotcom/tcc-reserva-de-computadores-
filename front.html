@@ -27,7 +27,7 @@
         /* --- TELA DE LOGIN --- */
         .login-container {
             display: flex; justify-content: center; align-items: center; height: 100vh;
-            background: linear-gradient(to bottom, #a4b494, #dbe7d5, #ffffff);
+            background: linear-gradient(to bottom, #a4b494, #dbe7d5);
         }
         .login-box {
             background: white; padding: 2.5rem; border-radius: 10px; width: 90%; max-width: 400px;
@@ -70,16 +70,21 @@
         #logout-btn { background: var(--accent); color: white; width: 100%; padding: 10px; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px; }
 
         /* --- CONTEÚDO PRINCIPAL --- */
-        .content { flex: 1; padding: 2rem; overflow-y: auto; }
+        .content { 
+            flex: 1; 
+            padding: 2rem; 
+            overflow-y: auto; 
+            background: linear-gradient(to bottom, #a4b494, #dbe7d5);
+        }
         .content header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
         .filters { display: flex; gap: 10px; }
         .filter-btn { background: white; color: var(--text); border: 1px solid #ccc; width: auto; padding: 8px 15px; border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 500; }
-        .filter-btn.active { background: var(--secondary); color: white; border-color: var(--secondary); }
+        .filter-btn.active { background: #4A5D23; color: white; border-color: #4A5D23; }
 
         /* --- CALENDÁRIO --- */
         .calendar-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
         .calendar-controls h3 { color: var(--primary); }
-        .calendar-controls button { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--secondary); }
+        .calendar-controls button { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #4A5D23; }
         .calendar-grid-header { display: grid; grid-template-columns: repeat(5, 1fr); text-align: center; font-weight: bold; margin-bottom: 10px; color: #777; }
         .calendar-body { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
 
@@ -108,7 +113,12 @@
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000;
         }
-        .modal-content { background: white; padding: 2rem; border-radius: 8px; width: 90%; max-width: 450px; position: relative; }
+        .modal-content { 
+            background: linear-gradient(to bottom, #a4b494, #dbe7d5);
+            padding: 2rem; 
+            border-radius: 8px; width: 90%; max-width: 450px; position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
         .modal-content h3 { margin-bottom: 1.5rem; color: var(--primary); }
         .close { position: absolute; top: 10px; right: 15px; font-size: 1.8rem; cursor: pointer; color: #aaa; }
         .modal-info p { margin-bottom: 10px; }
@@ -301,16 +311,9 @@
 
     <!-- MODAL DE RESERVA -->
     <div id="modal-reserva" class="modal">
-        <div class="modal-content">
         <div class="modal-content" id="reserva-content">
             <span class="close">&times;</span>
             <h3>Nova Reserva</h3>
-            <div class="modal-info">
-                <p><strong>Recurso:</strong> <span id="res-recurso"></span></p>
-                <p><strong>Data:</strong> <span id="res-data"></span></p>
-                <p><strong>Horário:</strong> <span id="res-hora"></span></p>
-            </div>
-            
             <div class="modal-body-flex">
                 <!-- Lado Esquerdo: Formulário -->
                 <div class="form-side">
@@ -320,20 +323,11 @@
                         <p><strong>Horário:</strong> <span id="res-hora"></span></p>
                     </div>
 
-            <!-- Box de sugestão da aula -->
-            <div id="aula-sugerida-box" class="aula-info-box">
-                <i class="fa-solid fa-chalkboard-user"></i> <strong>Sua Aula:</strong> <span id="aula-sugerida-texto"></span>
-            </div>
                     <!-- Box de sugestão da aula -->
                     <div id="aula-sugerida-box" class="aula-info-box">
                         <i class="fa-solid fa-chalkboard-user"></i> <strong>Sua Aula:</strong> <span id="aula-sugerida-texto"></span>
                     </div>
 
-            <form id="form-reserva">
-                <div class="input-group">
-                    <label for="res-turma">Turma / Disciplina:</label>
-                    <input type="text" id="res-turma" placeholder="Ex: 3º A - História" required>
-                </div>
                     <form id="form-reserva">
                         <div class="input-group">
                             <label for="res-turma">Turma / Disciplina:</label>
@@ -343,9 +337,6 @@
                             </div>
                         </div>
 
-                <div class="input-group">
-                    <label for="qtd-retirada">Quantidade a Retirar:</label>
-                    <input type="number" id="qtd-retirada" min="1" value="40">
                         <div class="input-group">
                             <label for="qtd-retirada">Quantidade a Retirar:</label>
                             <input type="number" id="qtd-retirada" min="1" value="40">
@@ -367,18 +358,6 @@
                         <button type="submit" class="btn-confirm">Confirmar Reserva</button>
                     </form>
                 </div>
-                
-                <div id="mouse-check-group" style="display:none;" class="input-group">
-                    <label><i class="fa-solid fa-computer-mouse"></i> Relatar problema com mouses?</label>
-                    <select id="mouse-status" class="input-group input">
-                        <option value="ok">Não, todos funcionando</option>
-                        <option value="problema">Sim, alguns com defeito</option>
-                    </select>
-                </div>
-
-                <div class="alert-box">
-                    <i class="fa-solid fa-battery-full fa-2x"></i>
-                    <strong>ATENÇÃO:</strong> Ao devolver, coloque todos os equipamentos para carregar imediatamente!
                 <!-- Lado Direito: Painel de Seleção (Aba Lateral) -->
                 <div class="panel-side" id="selection-panel">
                     <span class="panel-title">Selecione a Turma:</span>
@@ -391,9 +370,6 @@
                         <!-- Gerado via JS -->
                     </div>
                 </div>
-
-                <button type="submit" class="btn-confirm">Confirmar Reserva</button>
-            </form>
             </div>
         </div>
     </div>
@@ -1096,125 +1072,3 @@
     </script>
 </body>
 </html>
-
-            for (let dia = 1; dia <= diasNoMes; dia++) {
-                const cell = document.createElement('div');
-                cell.className = 'day-cell';
-                cell.innerHTML = `<span class="day-number">${dia}</span>`;
-                
-                const slotsContainer = document.createElement('div');
-                slotsContainer.className = 'slots-container';
-
-                slotsDoTurno.forEach(slot => {
-                    const divSlot = document.createElement('div');
-                    divSlot.innerText = `${slot.inicio} - ${slot.fim}`;
-                    divSlot.className = `slot ${slot.tipo === 'intervalo' ? 'intervalo' : 'livre'}`;
-                    
-                    const idUnico = `${dia}-${mes}-${ano}-${slot.inicio}-${estado.recursoSelecionado.id}`;
-
-                    if (slot.tipo === 'aula') {
-                        if (estado.reservas.has(idUnico)) {
-                            divSlot.classList.replace('livre', 'ocupado');
-                            divSlot.title = "Reservado";
-                        } else {
-                            divSlot.onclick = () => abrirModalReserva(dia, mes, ano, slot.inicio, idUnico);
-                        }
-                    }
-                    slotsContainer.appendChild(divSlot);
-                });
-                cell.appendChild(slotsContainer);
-                grid.appendChild(cell);
-            }
-        }
-
-        function abrirModalReserva(dia, mes, ano, hora, idUnico) {
-            estado.slotClicado = { idUnico };
-            
-            getEl('res-recurso').innerText = estado.recursoSelecionado.nome;
-            getEl('res-data').innerText = `${String(dia).padStart(2, '0')}/${String(mes + 1).padStart(2, '0')}/${ano}`;
-            getEl('res-hora').innerText = hora;
-            
-            const qtdInput = getEl('qtd-retirada');
-            qtdInput.max = estado.recursoSelecionado.total;
-            qtdInput.value = estado.recursoSelecionado.total;
-
-            getEl('mouse-check-group').style.display = estado.recursoSelecionado.hasMouse ? 'block' : 'none';
-            
-            getEl('modal-reserva').style.display = 'flex';
-        }
-
-        // Inicializa a aplicação
-        // A renderização inicial acontece após o login.
-    });
-    </script>
-</body>
-</html>
->>>>>>> 08ddf79 (alterado cores do sistema)
-            const mes = estado.dataAtual.getMonth();
-            
-            getEl('current-month').innerText = new Date(ano, mes).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-
-            const primeiroDiaSemana = new Date(ano, mes, 1).getDay();
-            const diasNoMes = new Date(ano, mes + 1, 0).getDate();
-
-            for (let i = 0; i < primeiroDiaSemana; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'day-cell other-month';
-                grid.appendChild(cell);
-            }
-
-            const slotsDoTurno = gerarSlots(estado.turnoAtual);
-
-            for (let dia = 1; dia <= diasNoMes; dia++) {
-                const cell = document.createElement('div');
-                cell.className = 'day-cell';
-                cell.innerHTML = `<span class="day-number">${dia}</span>`;
-                
-                const slotsContainer = document.createElement('div');
-                slotsContainer.className = 'slots-container';
-
-                slotsDoTurno.forEach(slot => {
-                    const divSlot = document.createElement('div');
-                    divSlot.innerText = `${slot.inicio} - ${slot.fim}`;
-                    divSlot.className = `slot ${slot.tipo === 'intervalo' ? 'intervalo' : 'livre'}`;
-                    
-                    const idUnico = `${dia}-${mes}-${ano}-${slot.inicio}-${estado.recursoSelecionado.id}`;
-
-                    if (slot.tipo === 'aula') {
-                        if (estado.reservas.has(idUnico)) {
-                            divSlot.classList.replace('livre', 'ocupado');
-                            divSlot.title = "Reservado";
-                        } else {
-                            divSlot.onclick = () => abrirModalReserva(dia, mes, ano, slot.inicio, idUnico);
-                        }
-                    }
-                    slotsContainer.appendChild(divSlot);
-                });
-                cell.appendChild(slotsContainer);
-                grid.appendChild(cell);
-            }
-        }
-
-        function abrirModalReserva(dia, mes, ano, hora, idUnico) {
-            estado.slotClicado = { idUnico };
-            
-            getEl('res-recurso').innerText = estado.recursoSelecionado.nome;
-            getEl('res-data').innerText = `${String(dia).padStart(2, '0')}/${String(mes + 1).padStart(2, '0')}/${ano}`;
-            getEl('res-hora').innerText = hora;
-            
-            const qtdInput = getEl('qtd-retirada');
-            qtdInput.max = estado.recursoSelecionado.total;
-            qtdInput.value = estado.recursoSelecionado.total;
-
-            getEl('mouse-check-group').style.display = estado.recursoSelecionado.hasMouse ? 'block' : 'none';
-            
-            getEl('modal-reserva').style.display = 'flex';
-        }
-
-        // Inicializa a aplicação
-        // A renderização inicial acontece após o login.
-    });
-    </script>
-</body>
-</html>
->>>>>>> 08ddf79 (alterado cores do sistema)
