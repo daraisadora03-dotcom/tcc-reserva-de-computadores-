@@ -22,16 +22,28 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
 
-        body { background-color: var(--bg); height: 100vh; display: flex; flex-direction: column; color: var(--text); }
+        html, body { height: 100vh; margin: 0; overflow: hidden; }
+        body { background-color: var(--bg); display: flex; flex-direction: column; color: var(--text); height: 100%; }
 
         /* --- TELA DE LOGIN --- */
         .login-container {
-            display: flex; justify-content: center; align-items: center; height: 100vh;
+            display: flex; justify-content: center; align-items: center; height: 100vh; width: 100%;
             background: linear-gradient(to bottom, #a4b494, #dbe7d5);
+            position: relative;
+            overflow-y: auto;
+        }
+        .bg-icon {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.3);
+            z-index: 0;
+            pointer-events: none;
+            user-select: none;
         }
         .login-box {
             background: white; padding: 2.5rem; border-radius: 10px; width: 90%; max-width: 400px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2); text-align: center;
+            position: relative;
+            z-index: 1;
         }
         .login-box h2 { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 2rem; color: var(--primary); }
         .input-group { margin-bottom: 1.2rem; text-align: left; }
@@ -46,13 +58,14 @@
         .note { font-size: 0.8rem; color: #777; margin-top: 1rem; }
 
         /* --- LAYOUT DA APLICAÇÃO --- */
-        .app-container { display: flex; height: 100vh; }
+        .app-container { display: flex; height: 100vh; width: 100%; overflow: hidden; }
 
         /* --- MENU LATERAL (SIDEBAR) --- */
         .sidebar {
-            width: 260px; background: var(--primary); border-right: 1px solid var(--border-light);
+            width: 260px; min-width: 260px; background: var(--primary); border-right: 1px solid var(--border-light);
             display: flex; flex-direction: column; padding: 1.5rem 1rem;
             color: white;
+            overflow-y: auto;
         }
         .logo-area { margin-bottom: 2rem; color: white; text-align: center; }
         .logo-area h3 { font-size: 1.5rem; }
@@ -73,13 +86,29 @@
         .content { 
             flex: 1; 
             padding: 2rem; 
-            overflow-y: auto; 
+            overflow-y: auto;
         background: linear-gradient(to bottom, #a4b494, #dbe7d5);
         }
         .content header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
         .content header h2 { color: #4A5D23; }
         .filters { display: flex; gap: 10px; }
         .filter-btn { background: white; color: var(--text); border: 1px solid #ccc; width: auto; padding: 8px 15px; border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 500; }
+
+        /* --- ESTILO PERSONALIZADO DA BARRA DE ROLAGEM --- */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4A5D23;
+        }
+
         .filter-btn.active { background: #4A5D23; color: white; border-color: #4A5D23; }
 
         /* --- CALENDÁRIO --- */
@@ -211,6 +240,15 @@
 
     <!-- TELA DE LOGIN -->
     <div id="login-screen" class="login-container">
+        <!-- Elementos Escolares Decorativos -->
+        <i class="fa-solid fa-book bg-icon" style="top: 10%; left: 5%; font-size: 5rem; transform: rotate(-15deg);"></i>
+        <i class="fa-solid fa-pencil bg-icon" style="top: 20%; right: 10%; font-size: 4rem; transform: rotate(20deg);"></i>
+        <i class="fa-solid fa-graduation-cap bg-icon" style="bottom: 15%; left: 8%; font-size: 6rem; transform: rotate(-10deg);"></i>
+        <i class="fa-solid fa-computer bg-icon" style="bottom: 10%; right: 15%; font-size: 4.5rem; transform: rotate(15deg);"></i>
+        <i class="fa-solid fa-calculator bg-icon" style="top: 55%; left: 12%; font-size: 3rem; transform: rotate(5deg);"></i>
+        <i class="fa-solid fa-flask bg-icon" style="top: 65%; right: 8%; font-size: 5.5rem; transform: rotate(-20deg);"></i>
+        <i class="fa-solid fa-compass-drafting bg-icon" style="top: 5%; right: 30%; font-size: 3.5rem; opacity: 0.15;"></i>
+
         <div class="login-box">
             <h2><i class="fa-solid fa-school"></i> Acesso Professores</h2>
             <form id="login-form">
@@ -384,6 +422,7 @@
             <div class="admin-tabs">
                 <button class="admin-tab-btn active" data-target="tab-manutencao">Manutenção de Aparelhos</button>
                 <button class="admin-tab-btn" data-target="tab-usuarios">Professores Cadastrados</button>
+                <button class="admin-tab-btn" data-target="tab-reservas">Todas as Reservas</button>
                 <button class="admin-tab-btn" data-target="tab-pendencias">Pendência de Professor que falta realizar o cadastro <span id="badge-pend" style="background:var(--accent); color:white; border-radius:50%; padding:2px 6px; font-size:0.7rem;">!</span></button>
             </div>
 
@@ -412,6 +451,28 @@
                 </div>
             </div>
 
+            <!-- Tab: Todas as Reservas -->
+            <div id="tab-reservas" class="admin-tab-content">
+                <h4 style="margin-bottom: 1rem; color: var(--primary);">Visão Geral de Reservas</h4>
+                <div class="table-container" style="max-height: 400px; overflow-y: auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Recurso</th>
+                                <th>Data</th>
+                                <th>Horário</th>
+                                <th>Turma</th>
+                                <th>Qtd.</th>
+                                <th>Professor</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-todas-reservas-list">
+                            <!-- Reservas serão carregadas via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
             <!-- Tab: Lista de Professores -->
             <div id="tab-usuarios" class="admin-tab-content">
                 <div class="admin-toolbar">
@@ -932,6 +993,14 @@
                             // Mostra a turma e muda o title para detalhes completos
                             divSlot.innerHTML = `<span style="font-size:0.75rem">${slot.inicio}</span><br><strong>${reserva.turma || 'Reservado'}</strong>`;
                             divSlot.title = `Prof: ${reserva.professor}\nTurma: ${reserva.turma}\nQtd: ${reserva.qtd}`; 
+
+                            // Permite que o dono da reserva ou a direção cancele
+                            if (estado.usuarioLogado && (reserva.professor === estado.usuarioLogado.nome || estado.usuarioLogado.role === 'direcao' || estado.usuarioLogado.role === 'admin')) {
+                                divSlot.style.cursor = 'pointer';
+                                divSlot.style.opacity = '1';
+                                divSlot.title += "\n(Clique para cancelar)";
+                                divSlot.onclick = () => cancelarReserva(idUnico, reserva);
+                            }
                         } else {
                             // Se estiver livre, mantém o padrão
                             divSlot.onclick = () => abrirModalReserva(dia, mes, ano, slot.inicio, idUnico);
@@ -941,6 +1010,15 @@
                 });
                 cell.appendChild(slotsContainer);
                 grid.appendChild(cell);
+            }
+        }
+
+        function cancelarReserva(idUnico, reserva) {
+            if (confirm(`Deseja cancelar a reserva de ${reserva.recursoNome} para o dia ${reserva.data} às ${reserva.hora}?`)) {
+                estado.reservas.delete(idUnico);
+                saveReservas();
+                alert("Reserva cancelada com sucesso!");
+                renderCalendar();
             }
         }
 
@@ -992,6 +1070,7 @@
         function renderAdminView(filter = '') {
             const problemasEl = getEl('admin-problemas-list');
             const usersEl = getEl('admin-users-list');
+            const todasReservasEl = getEl('admin-todas-reservas-list');
             const pendenciasEl = getEl('admin-pendencias-list');
             
             // 1. Renderiza problemas (Manutenção) em Tabela
@@ -1042,6 +1121,36 @@
                 });
             }
 
+            // 3. Renderiza Todas as Reservas
+            todasReservasEl.innerHTML = '';
+            if (estado.reservas.size === 0) {
+                todasReservasEl.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px;">Nenhuma reserva encontrada.</td></tr>';
+            } else {
+                // Converte o Map para Array e ordena por data e hora para melhor visualização
+                const reservasOrdenadas = Array.from(estado.reservas.values()).sort((a, b) => {
+                    const dateA = new Date(a.data.split('/').reverse().join('-') + 'T' + a.hora);
+                    const dateB = new Date(b.data.split('/').reverse().join('-') + 'T' + b.hora);
+                    return dateA - dateB;
+                });
+
+                reservasOrdenadas.forEach(reserva => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${reserva.recursoNome}</td>
+                        <td>${reserva.data}</td>
+                        <td>${reserva.hora}</td>
+                        <td>${reserva.turma}</td>
+                        <td>${reserva.qtd}</td>
+                        <td>${reserva.professor}</td>
+                        <td>
+                            <button class="action-btn btn-delete" title="Cancelar Reserva" onclick="cancelarReserva('${reserva.id}', ${JSON.stringify(reserva).replace(/"/g, '&quot;')}); renderAdminView();">
+                                <i class="fa-solid fa-xmark"></i> Cancelar
+                            </button>
+                        </td>
+                    `;
+                    todasReservasEl.appendChild(row);
+                });
+            }
             // 4. Renderiza Pendências (Cards de Alerta)
             pendenciasEl.innerHTML = '';
             getEl('badge-pend').style.display = estado.pendencias.length > 0 ? 'inline-block' : 'none';
