@@ -259,6 +259,7 @@
                 <div class="input-group">
                     <label for="senha">Senha</label>
                     <input type="password" id="senha" placeholder="********" required>
+                    <a href="#" id="link-esqueceu-senha" style="font-size: 0.8rem; color: var(--primary); text-decoration: none; display: block; margin-top: 5px; text-align: right; font-weight: 500;">Esqueceu a senha?</a>
                 </div>
                 <button type="submit">Entrar</button>
             </form>
@@ -561,6 +562,25 @@
         </div>
     </div>
 
+    <!-- MODAL DE RECUPERAÇÃO DE SENHA -->
+    <div id="modal-recuperar-senha" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Redefinir Senha</h3>
+            <form id="form-recuperar-senha">
+                <div class="input-group">
+                    <label for="rec-cpf">Confirme seu CPF</label>
+                    <input type="text" id="rec-cpf" placeholder="000.000.000-00" required>
+                </div>
+                <div class="input-group">
+                    <label for="nova-senha">Senha Nova:</label>
+                    <input type="password" id="nova-senha" placeholder="********" required>
+                </div>
+                <button type="submit" class="btn-confirm">Atualizar Senha</button>
+            </form>
+        </div>
+    </div>
+
     <script>
     // --- LÓGICA DO SISTEMA (JAVASCRIPT) ---
 
@@ -778,6 +798,27 @@
             getEl('lbl-cad-role').style.display = 'none';
             getEl('cad-role').value = 'professor';
             getEl('modal-cadastro').style.display = 'flex';
+        });
+
+        getEl('link-esqueceu-senha').addEventListener('click', (e) => {
+            e.preventDefault();
+            getEl('modal-recuperar-senha').style.display = 'flex';
+        });
+
+        getEl('form-recuperar-senha').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const cpf = getEl('rec-cpf').value.replace(/\D/g, '');
+            const novaSenha = getEl('nova-senha').value;
+
+            if (USERS[cpf]) {
+                USERS[cpf].senha = novaSenha;
+                saveUsers(); // Salva a alteração no localStorage
+                alert("Senha redefinida com sucesso! Você já pode entrar com sua nova senha.");
+                getEl('form-recuperar-senha').reset();
+                getEl('modal-recuperar-senha').style.display = 'none';
+            } else {
+                alert("Erro: CPF não encontrado no sistema. Por favor, verifique os dados ou procure a secretaria.");
+            }
         });
 
         getEl('logout-btn').addEventListener('click', () => location.reload());
