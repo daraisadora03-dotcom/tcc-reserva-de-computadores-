@@ -304,6 +304,7 @@
                 <ul>
                     <li id="btn-manutencao"><i class="fa-solid fa-triangle-exclamation"></i> Reportar Problema</li>
                     <li id="btn-admin"><i class="fa-solid fa-user-tie"></i> Área da Direção</li>
+                    <li id="btn-ia"> <i class="fa-solid fa-robot"></i> Assistente IA</li>
                 </ul>
             </nav>
 
@@ -425,6 +426,7 @@
                 <button class="admin-tab-btn" data-target="tab-usuarios">Professores Cadastrados</button>
                 <button class="admin-tab-btn" data-target="tab-reservas">Todas as Reservas</button>
                 <button class="admin-tab-btn" data-target="tab-pendencias">Pendência de Professor que falta realizar o cadastro <span id="badge-pend" style="background:var(--accent); color:white; border-radius:50%; padding:2px 6px; font-size:0.7rem;">!</span></button>
+                <button class="admin-tab-btn" data-target="tab-ia-gestao">Gestão por IA</button>
             </div>
 
             <!-- Tab: Pendências (Prioridade) -->
@@ -493,6 +495,22 @@
                         </thead>
                         <tbody id="admin-users-list"></tbody>
                     </table>
+                </div>
+            </div>
+
+            <!-- Tab: Gestão por IA -->
+            <div id="tab-ia-gestao" class="admin-tab-content">
+                <h4 style="margin-bottom: 1rem; color: var(--primary);">Análise Inteligente do Sistema</h4>
+                <div class="alert-box" style="background: #e3f2fd; color: #0d47a1; border-left-color: #2196f3;">
+                    <i class="fa-solid fa-brain fa-2x"></i>
+                    <div>
+                        <strong>Insight da IA:</strong> Detectei que o Carrinho 1 está com 90% de ocupação nas manhãs de quarta-feira. 
+                        Recomendamos sugerir o Carrinho 2 para os professores de humanas para equilibrar o desgaste.
+                    </div>
+                </div>
+                <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #ddd;">
+                    <h5>Previsão de Manutenção</h5>
+                    <p style="font-size: 0.9rem; color: #666; margin-top: 10px;">Com base nos últimos reportes, os notebooks do Carrinho 3 podem precisar de revisão nas fontes de energia nos próximos 30 dias.</p>
                 </div>
             </div>
         </div>
@@ -578,6 +596,23 @@
                 </div>
                 <button type="submit" class="btn-confirm">Atualizar Senha</button>
             </form>
+        </div>
+    </div>
+
+    <!-- MODAL IA CHAT -->
+    <div id="modal-ia" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <span class="close">&times;</span>
+            <h3><i class="fa-solid fa-robot"></i> Assistente Virtual</h3>
+            <div id="ia-chat-box" style="height: 300px; overflow-y: auto; background: rgba(255,255,255,0.6); border-radius: 8px; padding: 15px; margin-bottom: 15px; border: 1px solid rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 10px;">
+                <div style="background: #dcf8c6; padding: 10px; border-radius: 10px; align-self: flex-start; max-width: 80%; font-size: 0.9rem;">
+                    Olá! Sou a IA do sistema de reservas. Como posso ajudar você hoje?
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="ia-input" placeholder="Pergunte sobre horários ou recursos..." style="flex: 1; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
+                <button id="btn-ia-send" class="btn-confirm" style="margin-top: 0; width: auto; padding: 0 15px;"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
         </div>
     </div>
 
@@ -848,6 +883,36 @@
 
         getEl('prev-month').addEventListener('click', () => { estado.dataAtual.setMonth(estado.dataAtual.getMonth() - 1); renderCalendar(); });
         getEl('next-month').addEventListener('click', () => { estado.dataAtual.setMonth(estado.dataAtual.getMonth() + 1); renderCalendar(); });
+
+        getEl('btn-ia').addEventListener('click', () => {
+            getEl('modal-ia').style.display = 'flex';
+        });
+
+        getEl('btn-ia-send').addEventListener('click', () => {
+            const input = getEl('ia-input');
+            const chatBox = getEl('ia-chat-box');
+            if (!input.value.trim()) return;
+
+            const userMsg = document.createElement('div');
+            userMsg.style = "background: #fff; padding: 10px; border-radius: 10px; align-self: flex-end; max-width: 80%; font-size: 0.9rem; border: 1px solid #eee;";
+            userMsg.innerText = input.value;
+            chatBox.appendChild(userMsg);
+
+            const text = input.value.toLowerCase();
+            input.value = '';
+
+            setTimeout(() => {
+                const aiMsg = document.createElement('div');
+                aiMsg.style = "background: #dcf8c6; padding: 10px; border-radius: 10px; align-self: flex-start; max-width: 80%; font-size: 0.9rem;";
+                
+                if (text.includes('livre') || text.includes('vago')) aiMsg.innerText = "Verifiquei aqui: o Carrinho 2 está com maior disponibilidade esta semana. Deseja ver os horários?";
+                else if (text.includes('ajuda')) aiMsg.innerText = "Posso te ajudar a realizar reservas, reportar problemas técnicos ou trocar sua senha.";
+                else aiMsg.innerText = "Como sua assistente virtual de TCC, estou aqui para mostrar como a IA pode otimizar a organização escolar!";
+                
+                chatBox.appendChild(aiMsg);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }, 600);
+        });
 
         getEl('btn-manutencao').addEventListener('click', () => getEl('modal-manutencao').style.display = 'flex');
         getEl('btn-sala-tecnica').addEventListener('click', () => getEl('modal-sala-tecnica').style.display = 'flex');
