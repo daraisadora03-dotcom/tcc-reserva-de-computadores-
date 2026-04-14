@@ -230,6 +230,16 @@
         .panel-side { display: none; width: 320px; border-left: 1px solid #eee; padding-left: 20px; animation: fadeIn 0.3s; }
         .modal-content.expanded .panel-side { display: block; }
         .tags-container { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 15px; }
+
+        /* Animação para troca de recurso */
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .recurso-animado {
+            animation: slideInUp 0.4s ease-out;
+        }
+
         .tag-btn { padding: 5px 10px; border: 1px solid #ddd; border-radius: 15px; background: #f8f9fa; cursor: pointer; font-size: 0.8rem; transition: 0.2s; color: #555; }
         .tag-btn:hover { background: #e9ecef; border-color: #ced4da; }
         .tag-btn.selected { background: var(--primary); color: white; border-color: var(--primary); }
@@ -318,7 +328,7 @@
         <main class="content">
             
             <header>
-                <h2>Calendário de Reservas</h2>
+                <h2><i id="titulo-recurso-icone" class="fa-solid fa-laptop"></i> <span id="titulo-recurso-nome">Calendário de Reservas</span></h2>
                 <div class="filters">
                     <button class="filter-btn active" id="btn-fundamental">
                         <i class="fa-solid fa-child"></i> Fundamental
@@ -518,11 +528,62 @@
 
     <!-- MODAL SALA TÉCNICA -->
     <div id="modal-sala-tecnica" class="modal">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width: 800px;">
             <span class="close">&times;</span>
-            <h3>Sala Técnica</h3>
-            <p>Área destinada à equipe técnica.</p>
-            <p style="color: #777; font-style: italic;">Funcionalidades em desenvolvimento...</p>
+            <h3><i class="fa-solid fa-server"></i> Calendário de Reservas</h3>
+            
+            <div class="admin-tabs">
+                <button class="tech-tab-btn active" data-target="tech-calendario">Agenda da Sala</button>
+                <button class="tech-tab-btn" data-target="tech-recursos">Gerenciar Recursos</button>
+                <button class="tech-tab-btn" data-target="tech-monitor">Monitoramento do Sistema</button>
+            </div>
+
+            <!-- Tab: Calendário da Sala Técnica -->
+            <div id="tech-calendario" class="tech-tab-content">
+                <div class="calendar-controls" style="margin-top: 10px;">
+                    <button id="tech-prev-month"><i class="fa-solid fa-chevron-left"></i></button>
+                    <h3 id="tech-current-month" style="font-size: 1.1rem;">Mês Ano</h3>
+                    <button id="tech-next-month"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+                <div class="calendar-grid-header" style="font-size: 0.8rem; display: grid; grid-template-columns: repeat(5, 1fr); text-align: center;">
+                    <div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div>
+                </div>
+                <div id="tech-calendar-body" class="calendar-body" style="grid-template-columns: repeat(5, 1fr); gap: 5px;"></div>
+            </div>
+
+            <div id="tech-recursos" class="tech-tab-content" style="display: none;">
+                <p style="margin-bottom: 15px; font-size: 0.9rem; color: #666;">Ajuste a infraestrutura técnica dos equipamentos da escola.</p>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Recurso</th>
+                            <th>Capacidade</th>
+                            <th>Mouses</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tech-recursos-list-body"></tbody>
+                </table>
+            </div>
+
+            <div id="tech-monitor" class="tech-tab-content" style="display: none;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 10px;">
+                    <div style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #ddd; text-align: center;">
+                        <i class="fa-solid fa-wifi fa-2x" style="color: var(--green-ok);"></i>
+                        <h5 style="margin-top: 10px;">Status Wi-Fi</h5>
+                        <p style="font-size: 1.2rem; font-weight: bold; color: var(--green-ok);">ONLINE</p>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #ddd; text-align: center;">
+                        <i class="fa-solid fa-microchip fa-2x" style="color: var(--secondary);"></i>
+                        <h5 style="margin-top: 10px;">Carga do Servidor</h5>
+                        <p style="font-size: 1.2rem; font-weight: bold; color: var(--secondary);">12%</p>
+                    </div>
+                </div>
+                <div class="alert-box" style="margin-top: 20px;">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <strong>Dica Técnica:</strong> Utilize esta área para verificar se o sistema de reservas está sincronizado com o inventário físico.
+                </div>
+            </div>
         </div>
     </div>
 
@@ -660,7 +721,14 @@
     let estado = {
         usuarioLogado: null,
         turnoAtual: 'fundamental',
-        recursoSelecionado: { id: 'c1', nome: 'Carrinho 1', total: 40, hasMouse: false },
+        recursos: [
+            { id: 'c1', nome: 'Carrinho 1', total: 40, hasMouse: false, icone: 'fa-laptop' },
+            { id: 'c2', nome: 'Carrinho 2', total: 40, hasMouse: false, icone: 'fa-laptop' },
+            { id: 'c3', nome: 'Carrinho 3', total: 40, hasMouse: false, icone: 'fa-tablet-screen-button' },
+            { id: 'lab', nome: 'Lab. Acessa', total: 15, hasMouse: false, icone: 'fa-desktop' },
+            { id: 'tec', nome: 'Nots do Técnico', total: 40, hasMouse: true, icone: 'fa-screwdriver-wrench' }
+        ],
+        recursoSelecionado: null, // Definido no init
         dataAtual: new Date(),
         reservas: loadReservas(), // Carrega reservas salvas
         problemas: [ // Dados Mockados de exemplo
@@ -794,6 +862,10 @@
     document.addEventListener('DOMContentLoaded', () => {
         const getEl = (id) => document.getElementById(id);
 
+        // Inicializa recurso selecionado e renderiza sidebar
+        estado.recursoSelecionado = estado.recursos[0];
+        renderSidebarRecursos();
+
         // Sincroniza abas diferentes do mesmo navegador em tempo real
         window.addEventListener('storage', (e) => {
             if (e.key === 'sge_reservas') {
@@ -858,24 +930,15 @@
 
         getEl('logout-btn').addEventListener('click', () => location.reload());
 
-        document.querySelectorAll('#recursos-list li').forEach(item => {
-            item.addEventListener('click', () => {
-                // Apenas executa a lógica de recurso se o item tiver um 'data-id'
-                if (item.dataset.id) {
-                    const currentActive = document.querySelector('#recursos-list li.active');
-                    if (currentActive) {
-                        currentActive.classList.remove('active');
-                    }
-                    item.classList.add('active');
-                    estado.recursoSelecionado = {
-                        id: item.dataset.id,
-                        nome: item.innerText.trim(),
-                        total: parseInt(item.dataset.total),
-                        hasMouse: item.dataset.hasMouse === "true"
-                    };
-                    renderCalendar();
-                }
-            });
+        // Delegação de eventos para lista de recursos na sidebar
+        getEl('recursos-list').addEventListener('click', (e) => {
+            const item = e.target.closest('li[data-id]');
+            if (item) {
+                document.querySelectorAll('#recursos-list li').forEach(li => li.classList.remove('active'));
+                item.classList.add('active');
+                estado.recursoSelecionado = estado.recursos.find(r => r.id === item.dataset.id);
+                renderCalendar();
+            }
         });
 
         getEl('btn-fundamental').addEventListener('click', () => setTurno('fundamental'));
@@ -915,7 +978,11 @@
         });
 
         getEl('btn-manutencao').addEventListener('click', () => getEl('modal-manutencao').style.display = 'flex');
-        getEl('btn-sala-tecnica').addEventListener('click', () => getEl('modal-sala-tecnica').style.display = 'flex');
+        getEl('btn-sala-tecnica').addEventListener('click', () => {
+            renderSalaTecnica();
+            getEl('modal-sala-tecnica').style.display = 'flex';
+        });
+
         getEl('btn-admin').addEventListener('click', () => {
             const adminModal = getEl('modal-admin');
             if (adminModal) {
@@ -956,6 +1023,16 @@
             });
         });
 
+        // Abas da Sala Técnica
+        document.querySelectorAll('.tech-tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tech-tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tech-tab-content').forEach(c => c.style.display = 'none');
+                btn.classList.add('active');
+                getEl(btn.dataset.target).style.display = 'block';
+            });
+        });
+
         document.querySelectorAll('.modal .close').forEach(btn => {
             btn.addEventListener('click', () => {
                 btn.closest('.modal').style.display = 'none';
@@ -984,6 +1061,7 @@
                 saveReservas(); // Salva no localStorage
                 alert(`Reserva para ${qtd} item(ns) confirmada!\nRecurso: ${estado.recursoSelecionado.nome}\nLembre-se de carregar os aparelhos!`);
                 renderCalendar();
+                renderTechCalendar();
             }
             getEl('modal-reserva').style.display = 'none';
         });
@@ -1033,6 +1111,112 @@
         });
 
         // --- FUNÇÕES DE RENDERIZAÇÃO ---
+        function renderSidebarRecursos() {
+            const list = getEl('recursos-list');
+            const btnSalaTecnica = getEl('btn-sala-tecnica');
+            const items = list.querySelectorAll('li[data-id]');
+            items.forEach(i => i.remove());
+
+            estado.recursos.forEach(rec => {
+                const li = document.createElement('li');
+                li.dataset.id = rec.id;
+                if (estado.recursoSelecionado && estado.recursoSelecionado.id === rec.id) li.className = 'active';
+                li.innerHTML = `<i class="fa-solid ${rec.icone}"></i> ${rec.nome}`;
+                list.insertBefore(li, btnSalaTecnica);
+            });
+        }
+
+        function renderTechCalendar() {
+            const grid = getEl('tech-calendar-body');
+            if (!grid) return;
+            grid.innerHTML = '';
+            
+            const ano = estado.dataAtual.getFullYear();
+            const mes = estado.dataAtual.getMonth();
+            getEl('tech-current-month').innerText = new Date(ano, mes).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+
+            const primeiroDiaDoMes = new Date(ano, mes, 1);
+            const diasNoMes = new Date(ano, mes + 1, 0).getDate();
+            let diaSemanaInicio = primeiroDiaDoMes.getDay();
+            let padding = diaSemanaInicio > 0 && diaSemanaInicio < 6 ? diaSemanaInicio - 1 : 0;
+
+            for (let i = 0; i < padding; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'day-cell other-month';
+                grid.appendChild(cell);
+            }
+
+            const slotsDoTurno = gerarSlots(estado.turnoAtual);
+            const recSala = { id: 'sala-tec', nome: 'Sala Técnica', total: 1 };
+
+            for (let dia = 1; dia <= diasNoMes; dia++) {
+                const dataAtualLoop = new Date(ano, mes, dia);
+                if (dataAtualLoop.getDay() === 0 || dataAtualLoop.getDay() === 6) continue;
+
+                const cell = document.createElement('div');
+                cell.className = 'day-cell';
+                cell.style.minHeight = '70px';
+                cell.innerHTML = `<span class="day-number" style="font-size: 0.8rem;">${dia}</span>`;
+                
+                const slotsContainer = document.createElement('div');
+                slotsContainer.className = 'slots-container';
+
+                slotsDoTurno.forEach(slot => {
+                    const divSlot = document.createElement('div');
+                    divSlot.innerText = slot.inicio;
+                    divSlot.className = `slot ${slot.tipo === 'intervalo' ? 'intervalo' : 'livre'}`;
+                    divSlot.style.fontSize = '0.65rem';
+                    const idUnico = `${dia}-${mes}-${ano}-${slot.inicio}-sala-tec`;
+
+                    if (slot.tipo === 'aula') {
+                        if (estado.reservas.has(idUnico)) { 
+                            divSlot.classList.replace('livre', 'ocupado'); 
+                            divSlot.title = "Sala Ocupada";
+                        } else {
+                            divSlot.onclick = () => {
+                                estado.recursoSelecionado = recSala;
+                                abrirModalReserva(dia, mes, ano, slot.inicio, idUnico);
+                            };
+                        }
+                    }
+                    slotsContainer.appendChild(divSlot);
+                });
+                cell.appendChild(slotsContainer);
+                grid.appendChild(cell);
+            }
+        }
+
+        function renderSalaTecnica() {
+            const tbody = getEl('tech-recursos-list-body');
+            tbody.innerHTML = '';
+
+            estado.recursos.forEach((rec, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><i class="fa-solid ${rec.icone}"></i> ${rec.nome}</td>
+                    <td><strong>${rec.total}</strong> unid.</td>
+                    <td>${rec.hasMouse ? '<span class="status-badge ok">Sim</span>' : '<span class="status-badge pendente">Não</span>'}</td>
+                    <td>
+                        <button class="action-btn" onclick="editarCapacidade(${index})">
+                            <i class="fa-solid fa-sliders"></i> Ajustar
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        window.editarCapacidade = (index) => {
+            const rec = estado.recursos[index];
+            const novaQtd = prompt(`Ajustar capacidade total de: ${rec.nome}`, rec.total);
+            if (novaQtd !== null && !isNaN(novaQtd)) {
+                rec.total = parseInt(novaQtd);
+                renderSalaTecnica();
+                renderSidebarRecursos();
+                renderCalendar();
+            }
+        };
+
         function setTurno(turno) {
             estado.turnoAtual = turno;
             getEl('btn-fundamental').classList.toggle('active', turno === 'fundamental');
@@ -1042,6 +1226,18 @@
 
         function renderCalendar() {
             const grid = getEl('calendar-body');
+            
+            // Feedback Visual de Troca
+            const tituloNome = getEl('titulo-recurso-nome');
+            const tituloIcone = getEl('titulo-recurso-icone');
+            
+            tituloNome.innerText = `Reservas: ${estado.recursoSelecionado.nome}`;
+            tituloIcone.className = `fa-solid ${estado.recursoSelecionado.icone}`;
+            
+            grid.classList.remove('recurso-animado');
+            void grid.offsetWidth; // Trigger reflow para reiniciar animação
+            grid.classList.add('recurso-animado');
+
             grid.innerHTML = '';
             
             const ano = estado.dataAtual.getFullYear();
@@ -1125,6 +1321,7 @@
                 saveReservas();
                 alert("Reserva cancelada com sucesso!");
                 renderCalendar();
+                renderTechCalendar();
             }
         }
 
