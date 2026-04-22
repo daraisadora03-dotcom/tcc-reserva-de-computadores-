@@ -11,32 +11,32 @@ set /p msg="Digite a mensagem do seu commit: "
 if not exist .git (
     echo [INFO] Inicializando o Git...
     git init
-    set /p url="Cole a URL do seu repositorio GitHub (https://github.com/...): "
-    if not "%url%"=="" git remote add origin "%url%"
+    set /p url="Cole a URL do seu repositorio GitHub: "
+    git remote add origin %url%
 )
 
 :: Verifica se o remote 'origin' existe (caso a pasta .git ja existisse mas sem o link)
 git remote get-url origin >nul 2>&1
 if %errorlevel% neq 0 (
     echo [AVISO] Link do GitHub nao encontrado.
-    set /p url="Cole a URL do seu repositorio GitHub (https://github.com/...): "
-    if not "%url%"=="" git remote add origin "%url%"
+    set /p url="Cole a URL do seu repositorio GitHub: "
+    git remote add origin %url%
 )
 
 echo [INFO] Sincronizando com o GitHub (Pull)...
-:: Tenta sincronizar, mas ignora erros caso o repositorio remoto esteja vazio
+:: Tenta baixar alteracoes do GitHub antes de enviar
 git pull origin main --rebase >nul 2>&1
 
 echo [INFO] Corrigindo pastas aninhadas e limpando cache...
-:: Remove pastas .git internas de forma silenciosa para evitar erros de console
-for /f "tokens=*" %%i in ('dir /s /b /ad .git 2^>nul') do (
-    if /i "%%i" neq "%CD%\.git" (
-        attrib -h -r -s "%%i" /s /d >nul 2>&1
-        rd /s /q "%%i" >nul 2>&1
+for /d %%D in (*) do (
+    if /i "%%D" neq ".git" (
+        if exist "%%D\.git" (
+            attrib -h -r -s "%%D\.git" /s /d >nul 2>&1
+            rd /s /q "%%D\.git" >nul 2>&1
+        )
     )
 )
-:: Limpa o cache do Git silenciosamente para destravar o upload
-git rm -r --cached . >nul 2>&1
+git rm -r --cached . --quiet >nul 2>&1
 
 echo [INFO] Adicionando arquivos...
 git add .
@@ -51,7 +51,7 @@ git commit -m "%msg%"
 
 echo [INFO] Enviando alteracoes (Push)...
 git branch -M main
-git push -u origin main
+git push -u origin main --force
 
 if %errorlevel% equ 0 (
     echo.
