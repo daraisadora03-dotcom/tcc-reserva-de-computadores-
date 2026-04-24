@@ -826,7 +826,12 @@
             const senha = getEl('senha').value;
             const user = USERS[cpfLimpo];
 
-            if (user && user.senha === senha) {
+            if (!user) {
+                alert("CPF inexistente.");
+                return;
+            }
+
+            if (user.senha === senha) {
                 estado.usuarioLogado = user;
                 getEl('user-name').innerText = user.nome;
 
@@ -837,7 +842,7 @@
                 getEl('app-screen').style.display = 'flex';
                 renderCalendar();
             } else {
-                alert("CPF ou senha incorretos.");
+                alert("Senha incorreta.");
             }
         });
 
