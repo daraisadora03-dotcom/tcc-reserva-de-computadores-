@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SGE - Reserva de Equipamentos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- TELA DE LOGIN -->
+    <div id="login-screen" class="login-container">
+        <div class="login-box">
+            <h2><i class="fa-solid fa-school"></i> Acesso Professores</h2>
+            <form id="login-form">
+                <div class="input-group">
+                    <label for="cpf">CPF</label>
+                    <input type="text" id="cpf" placeholder="000.000.000-00" required>
+                </div>
+                <div class="input-group">
+                    <label for="senha">Senha</label>
+                    <input type="password" id="senha" placeholder="********" required>
+                </div>
+                <button type="submit">Entrar</button>
+            </form>
+            <p class="note" style="margin-top: 1rem; border-top: 1px solid #eee; padding-top: 1rem;">
+                Ainda não tem uma conta?
+                <a href="#" id="link-auto-cadastro" style="color: #8FB06B; font-weight: bold; text-decoration: none;">Cadastre-se aqui</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- SISTEMA PRINCIPAL -->
+    <div id="app-screen" class="app-container" style="display: none;">
+
+        <!-- Menu Lateral -->
+        <aside class="sidebar">
+            <div class="logo-area">
+                <h3>Gestão Escolar</h3>
+                <p>Reserva de Computadores</p>
+            </div>
+            <nav>
+                <p class="menu-title">Recursos Disponíveis</p>
+                <ul id="recursos-list">
+                    <li class="active" data-id="c1" data-total="40" data-has-mouse="false">
+                        <i class="fa-solid fa-laptop"></i> Carrinho 1 (40 Nots)
+                    </li>
+                    <li data-id="c2" data-total="40" data-has-mouse="false">
+                        <i class="fa-solid fa-laptop"></i> Carrinho 2 (40 Nots)
+                    </li>
+                    <li data-id="c3" data-total="40" data-has-mouse="false">
+                        <i class="fa-solid fa-tablet-screen-button"></i> Carrinho 3 (Tablets)
+                    </li>
+                    <li data-id="lab" data-total="15" data-has-mouse="false">
+                        <i class="fa-solid fa-desktop"></i> Lab. Acessa (~15 PCs)
+                    </li>
+                    <li data-id="tec" data-total="40" data-has-mouse="true">
+                        <i class="fa-solid fa-screwdriver-wrench"></i> Nots do Técnico (+Mouses)
+                    </li>
+                    <li id="btn-sala-tecnica">
+                        <i class="fa-solid fa-server"></i> Sala Técnica
+                    </li>
+                </ul>
+                <p class="menu-title">Gestão</p>
+                <ul>
+                    <li id="btn-manutencao"><i class="fa-solid fa-triangle-exclamation"></i> Reportar Problema</li>
+                    <li id="btn-admin"><i class="fa-solid fa-user-tie"></i> Área da Direção</li>
+                </ul>
+            </nav>
+            <div class="user-profile">
+                <span id="user-name">Prof. Visitante</span>
+                <button id="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Sair</button>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal -->
+        <main class="content">
+            <header>
+                <h2>Calendário de Reservas</h2>
+                <div class="filters">
+                    <button class="filter-btn active" id="btn-fundamental">
+                        <i class="fa-solid fa-child"></i> Fundamental
+                    </button>
+                    <button class="filter-btn" id="btn-medio">
+                        <i class="fa-solid fa-graduation-cap"></i> Médio
+                    </button>
+                </div>
+            </header>
+            <div class="calendar-controls">
+                <button id="prev-month"><i class="fa-solid fa-chevron-left"></i></button>
+                <h3 id="current-month">Mês Ano</h3>
+                <button id="next-month"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+            <div class="calendar-grid-header">
+                <div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div>
+            </div>
+            <div id="calendar-body" class="calendar-body"></div>
+            <div class="legend">
+                <span class="badge livre" style="background: #d4edda; color: #155724;">Livre</span>
+                <span class="badge ocupado" style="background: #f8d7da; color: #721c24;">Ocupado</span>
+                <span class="badge intervalo" style="background: #e2e3e5; color: #383d41;">Intervalo</span>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL DE RESERVA -->
+    <div id="modal-reserva" class="modal">
+        <div class="modal-content" id="reserva-content">
+            <span class="close">&times;</span>
+            <h3>Nova Reserva</h3>
+            <div class="modal-body-flex">
+                <div class="form-side">
+                    <div class="modal-info">
+                        <p><strong>Recurso:</strong> <span id="res-recurso"></span></p>
+                        <p><strong>Data:</strong> <span id="res-data"></span></p>
+                        <p><strong>Horário:</strong> <span id="res-hora"></span></p>
+                    </div>
+                    <div id="aula-sugerida-box" class="aula-info-box">
+                        <i class="fa-solid fa-chalkboard-user"></i>
+                        <strong>Sua Aula:</strong> <span id="aula-sugerida-texto"></span>
+                    </div>
+                    <form id="form-reserva">
+                        <div class="input-group">
+                            <label for="res-turma">Turma / Disciplina:</label>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="text" id="res-turma" placeholder="Ex: 3º A - História" required style="flex:1;">
+                                <button type="button" id="btn-toggle-list"
+                                    style="padding: 0 12px; border: 1px solid #ccc; background: #eee; border-radius: 5px; cursor: pointer;"
+                                    title="Selecionar da Lista">
+                                    <i class="fa-solid fa-list"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="qtd-retirada">Quantidade a Retirar:</label>
+                            <input type="number" id="qtd-retirada" min="1" value="40">
+                        </div>
+                        <div id="mouse-check-group" style="display:none;" class="input-group">
+                            <label><i class="fa-solid fa-computer-mouse"></i> Relatar problema com mouses?</label>
+                            <select id="mouse-status" class="input-fix">
+                                <option value="ok">Não, todos funcionando</option>
+                                <option value="problema">Sim, alguns com defeito</option>
+                            </select>
+                        </div>
+                        <div class="alert-box">
+                            <i class="fa-solid fa-battery-full fa-2x"></i>
+                            <strong>ATENÇÃO:</strong> Ao devolver, coloque todos os equipamentos para carregar imediatamente!
+                        </div>
+                        <button type="submit" class="btn-confirm">Confirmar Reserva</button>
+                    </form>
+                </div>
+                <div class="panel-side" id="selection-panel">
+                    <span class="panel-title">Selecione a Turma:</span>
+                    <div class="tags-container" id="list-turmas"></div>
+                    <span class="panel-title">Selecione a Disciplina:</span>
+                    <div class="tags-container" id="list-materias"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE ADMINISTRAÇÃO -->
+    <div id="modal-admin" class="modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <span class="close">&times;</span>
+            <h3>Área da Direção</h3>
+            <div class="admin-tabs">
+                <button class="admin-tab-btn active" data-target="tab-manutencao">Manutenção de Aparelhos</button>
+                <button class="admin-tab-btn" data-target="tab-usuarios">Professores Cadastrados</button>
+                <button class="admin-tab-btn" data-target="tab-pendencias">
+                    Pendências
+                    <span id="badge-pend" style="background:var(--accent); color:white; border-radius:50%; padding:2px 6px; font-size:0.7rem;">!</span>
+                </button>
+            </div>
+            <div id="tab-manutencao" class="admin-tab-content active">
+                <h4 style="margin-bottom: 1rem; color: var(--primary);">Controle de Manutenção</h4>
+                <div style="max-height: 400px; overflow-y: auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Equipamento</th><th>Defeito</th><th>Data Reporte</th><th>Previsão</th><th>Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-problemas-list"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div id="tab-usuarios" class="admin-tab-content">
+                <div class="admin-toolbar">
+                    <input type="text" id="search-prof" class="search-input" placeholder="Buscar por nome ou CPF...">
+                    <button id="btn-novo-usuario" class="action-btn" style="background: var(--secondary); color: white;">+ Novo Usuário</button>
+                </div>
+                <div style="max-height: 400px; overflow-y: auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>Nome</th><th>CPF</th><th>Função</th><th>Ações</th></tr>
+                        </thead>
+                        <tbody id="admin-users-list"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div id="tab-pendencias" class="admin-tab-content">
+                <h4 style="margin-bottom: 1rem; color: var(--primary);">Professores com cadastro pendente</h4>
+                <div id="admin-pendencias-list" style="max-height: 400px; overflow-y: auto;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL SALA TÉCNICA -->
+    <div id="modal-sala-tecnica" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Sala Técnica</h3>
+            <p>Área destinada à equipe técnica.</p>
+            <p style="color: #777; font-style: italic; margin-top: 0.5rem;">Funcionalidades em desenvolvimento...</p>
+        </div>
+    </div>
+
+    <!-- MODAL DE MANUTENÇÃO -->
+    <div id="modal-manutencao" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Reportar Problema</h3>
+            <form id="form-manutencao">
+                <div class="input-group">
+                    <label>Equipamento:</label>
+                    <input type="text" id="manut-equipamento" placeholder="Ex: Notebook #12 - Carrinho 1" required>
+                </div>
+                <div class="input-group">
+                    <label>Descrição do defeito:</label>
+                    <textarea id="manut-descricao" rows="3" placeholder="Ex: A tela não liga, teclado com tecla 'A' falhando." required></textarea>
+                </div>
+                <button type="submit" class="btn-confirm">Enviar Reporte</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DE CADASTRO -->
+    <div id="modal-cadastro" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Cadastrar Usuário</h3>
+            <form id="form-cadastro">
+                <div class="input-group">
+                    <label>Nome Completo</label>
+                    <input type="text" id="cad-nome" required>
+                </div>
+                <div class="input-group">
+                    <label>Email Institucional</label>
+                    <input type="email" id="cad-email" placeholder="professor@educacao.sp.gov.br" required>
+                </div>
+                <div class="input-group">
+                    <label>CPF (Apenas números)</label>
+                    <input type="text" id="cad-cpf" placeholder="Somente números" maxlength="11" required>
+                </div>
+                <div class="input-group">
+                    <label>Senha</label>
+                    <input type="password" id="cad-senha" required>
+                </div>
+                <div class="input-group">
+                    <label id="lbl-cad-role">Função</label>
+                    <select id="cad-role" class="input-fix">
+                        <option value="professor">Professor</option>
+                        <option value="direcao">Direção</option>
+                        <option value="admin">Administrador TI</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-confirm">Salvar Cadastro</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
