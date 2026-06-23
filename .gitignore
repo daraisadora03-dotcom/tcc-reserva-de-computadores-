@@ -1,0 +1,20 @@
+# Secrets
+.env
+.env.local
+.env.*.local
+
+# Dependencies
+node_modules/
+package-lock.json
+
+# Orphan files (not referenced by any HTML)
+script.js
+style.css
+
+# Old prototypes / superseded versions
+front.html
+Código TCC.txt
+Novo(a) Documento de Texto.txt
+Curriculo.html
+GUIA-GIT.md
+supabase_schema.sql

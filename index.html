@@ -6,9 +6,7 @@
     <title>SGE - Reserva de Equipamentos</title>
     <!-- Importando Ícones (Font Awesome) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+    
     <style>
         /* --- ESTILOS GERAIS (CSS) --- */
         :root {
@@ -191,11 +189,6 @@
             transition: box-shadow 0.2s;
         }
         .day-cell.other-month { background: #f9fafb; }
-        .day-cell.today {
-            border: 2px solid var(--primary);
-            background-color: #fffef0;
-            box-shadow: inset 0 0 5px rgba(143, 176, 107, 0.2);
-        }
         .day-cell:hover { box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
         .day-number { font-weight: bold; margin-bottom: 5px; display: block; color: #555; }
         .day-cell.other-month .day-number { color: #ccc; }
@@ -360,12 +353,12 @@
             <h2><i class="fa-solid fa-school"></i> Acesso Professores</h2>
             <form id="login-form">
                 <div class="input-group">
-                    <label for="cpf">CPF</label>
-                    <input type="text" id="cpf" placeholder="000.000.000-00" required>
+                    <label for="login-email">Email Institucional</label>
+                    <input type="email" id="login-email" placeholder="professor@educacao.sp.gov.br" required>
                 </div>
                 <div class="input-group">
-                    <label for="senha">Senha</label>
-                    <input type="password" id="senha" placeholder="********" required>
+                    <label for="login-senha">Senha</label>
+                    <input type="password" id="login-senha" placeholder="********" required>
                     <a href="#" id="link-esqueceu-senha" style="font-size: 0.8rem; color: var(--primary); text-decoration: none; display: block; margin-top: 5px; text-align: right; font-weight: 500;">Esqueceu a senha?</a>
                 </div>
                 <button type="submit">Entrar</button>
@@ -747,14 +740,10 @@
             <h3>Redefinir Senha</h3>
             <form id="form-recuperar-senha">
                 <div class="input-group">
-                    <label for="rec-cpf">Confirme seu CPF</label>
-                    <input type="text" id="rec-cpf" placeholder="000.000.000-00" required>
+                    <label for="rec-email">Email Institucional</label>
+                    <input type="email" id="rec-email" placeholder="professor@educacao.sp.gov.br" required>
                 </div>
-                <div class="input-group">
-                    <label for="nova-senha">Senha Nova:</label>
-                    <input type="password" id="nova-senha" placeholder="********" required>
-                </div>
-                <button type="submit" class="btn-confirm">Atualizar Senha</button>
+                <button type="submit" class="btn-confirm">Enviar Link de Redefinição</button>
             </form>
         </div>
     </div>
@@ -776,15 +765,11 @@
         </div>
     </div>
 
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase.js"></script>
     <script>
     // --- LÓGICA DO SISTEMA (JAVASCRIPT) ---
-
-    // --- CONFIGURAÇÃO SUPABASE ---
-    // Nota: Em um ambiente de produção com build (Vite/Next), usaríamos process.env
-    // Para HTML estático puro, mantemos as chaves anon (públicas) aqui.
-    const SUPABASE_URL = "https://bhzfqbcqijpwnjvnqofc.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_NhuxnRwDk-P9AdvXeT1ucA_lD1FUsC_";
-    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     // --- CONFIGURAÇÕES DE HORÁRIOS ---
     const CONFIG = {
@@ -798,85 +783,48 @@
         }
     };
 
-    // --- FUNÇÕES DE SINCRONIZAÇÃO COM SUPABASE ---
-    async function loadResources() {
-        const { data, error } = await _supabase.from('recursos').select('*').eq('ativo', true);
-        if (!error && data) {
-            estado.recursos = data.map(r => ({
-                id: r.id, nome: r.nome, total: r.total_equipamentos,
-                hasMouse: r.possui_mouse, icone: r.icone
-            }));
-            renderSidebarRecursos();
-        }
+    // --- GERENCIAMENTO DE RESERVAS (PERSISTÊNCIA) ---
+    function saveReservas() {
+        localStorage.setItem('sge_reservas', JSON.stringify(Array.from(estado.reservas.entries())));
     }
 
-    async function loadReservasSupabase() {
-        const { data, error } = await _supabase
-            .from('reservas')
-            .select('*, profiles(full_name)');
-
-        if (!error && data) {
-            estado.reservas = new Map();
-            data.forEach(r => {
-                // Reconstroi o ID único tratando a data como string para evitar erros de fuso horário
-                const parts = r.data_reserva.split('-'); // YYYY-MM-DD
-                const dia = parseInt(parts[2]);
-                const mes = parseInt(parts[1]) - 1;
-                const ano = parseInt(parts[0]);
-                const idUnico = `${dia}-${mes}-${ano}-${r.horario_inicio.substring(0,5)}-${r.recurso_id}`;
-
-                estado.reservas.set(idUnico, {
-                    id: r.id, // UUID do Banco
-                    recursoNome: estado.recursos.find(rec => rec.id === r.recurso_id)?.nome,
-                    data: `${parts[2]}/${parts[1]}/${parts[0]}`,
-                    hora: r.horario_inicio.substring(0,5),
-                    turma: r.turma_disciplina,
-                    qtd: r.quantidade,
-                    professor: r.profiles?.full_name || 'Desconhecido'
-                });
-            });
-            renderCalendar();
-            renderTechCalendar();
-        }
+    function saveProblemas() {
+        localStorage.setItem('sge_problemas', JSON.stringify(estado.problemas));
     }
 
-    async function loadAdminData() {
-        // Busca perfis
-        const { data: pData } = await _supabase.from('profiles').select('*');
-        if (pData) estado.listaUsuarios = pData;
+    function loadProblemas() {
+        const saved = localStorage.getItem('sge_problemas');
+        return saved ? JSON.parse(saved) : [];
+    }
 
-        // Busca manutenções
-        const { data: mData } = await _supabase.from('manutencoes').select('*, profiles(full_name)');
-        if (mData) {
-            estado.problemas = mData.map(m => ({
-                id: m.id,
-                equipamento: m.equipamento,
-                descricao: m.descricao,
-                data: new Date(m.data_reporte).toLocaleDateString('pt-BR'),
-                previsao: m.status === 'Resolvido' ? 'Concluído' : 'Em análise',
-                status: m.status,
-                reportadoPor: m.profiles?.full_name || 'Desconhecido'
-            }));
-        }
-
-        // Busca pendências (tabela opcional; se não existir, mantém lista vazia)
-        const { data: penData } = await _supabase.from('pendencias_cadastro').select('*');
-        if (penData) estado.pendencias = penData;
-
-        renderAdminView();
+    function loadReservas() {
+        const saved = localStorage.getItem('sge_reservas');
+        if (!saved) return new Map();
+        const data = JSON.parse(saved);
+        const map = new Map();
+        // Migração: Garante que cada entrada seja um Array de reservas
+        data.forEach(([key, val]) => {
+            map.set(key, Array.isArray(val) ? val : [val]);
+        });
+        return map;
     }
 
     // --- ESTADO GLOBAL DA APLICAÇÃO ---
     let estado = {
         usuarioLogado: null,
         turnoAtual: 'fundamental',
-        recursos: [],
-        recursoSelecionado: null, // Definido após o login, quando os recursos forem carregados
+        recursos: [
+            { id: 'c1', nome: 'Carrinho Vermelho', total: 40, hasMouse: false, icone: 'fa-laptop' },
+            { id: 'c2', nome: 'Carrinho Azul', total: 40, hasMouse: false, icone: 'fa-laptop' },
+            { id: 'lab', nome: 'Lab. Acessa', total: 15, hasMouse: false, icone: 'fa-desktop' },
+            { id: 'tec', nome: 'Nots do Técnico', total: 40, hasMouse: true, icone: 'fa-screwdriver-wrench' },
+            { id: 'sala-tec', nome: 'Sala Técnica', total: 1, hasMouse: false, icone: 'fa-server' }
+        ],
+        recursoSelecionado: null, // Definido no init
         dataAtual: new Date(),
-        reservas: new Map(),
-        problemas: [],
-        pendencias: [],
-        listaUsuarios: []
+        reservas: loadReservas(),
+        problemas: loadProblemas(),
+        pendencias: []
     };
 
     // --- GRADE HORÁRIA (SIMULAÇÃO) ---
@@ -893,7 +841,7 @@
     function renderSidePanel() {
         const divTurmas = document.getElementById('list-turmas');
         const divMaterias = document.getElementById('list-materias');
-
+        
         divTurmas.innerHTML = '';
         divMaterias.innerHTML = '';
 
@@ -975,7 +923,7 @@
                 atual = proximoIntervalo.inicio;
                 continue;
             }
-
+            
             // Cria o slot de aula normal
             slots.push({ tipo: 'aula', inicio: minToTime(atual), fim: minToTime(fimAula) });
             atual = fimAula;
@@ -987,53 +935,80 @@
     document.addEventListener('DOMContentLoaded', () => {
         const getEl = (id) => document.getElementById(id);
 
-        // Restaura sessão existente (o client do Supabase persiste o token automaticamente)
+        // Inicializa recurso selecionado e renderiza sidebar
+        estado.recursoSelecionado = estado.recursos[0];
+        renderSidebarRecursos();
+
+        // Restaura sessão via Supabase Auth
         (async () => {
-            const { data: { session } } = await _supabase.auth.getSession();
-            if (!session) return;
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) {
+                const { data: profile } = await supabaseClient
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', session.user.id)
+                    .single();
 
-            const { data: profile } = await _supabase.from('profiles').select('*').eq('id', session.user.id).single();
-            if (!profile) return;
-
-            estado.usuarioLogado = profile;
-            getEl('user-name').innerText = profile.full_name;
-            getEl('btn-admin').style.display = (profile.role === 'direcao' || profile.role === 'admin') ? 'flex' : 'none';
-            getEl('login-screen').style.display = 'none';
-            getEl('app-screen').style.display = 'flex';
-
-            await loadResources();
-            estado.recursoSelecionado = estado.recursos[0];
-            renderSidebarRecursos();
-            await loadReservasSupabase();
+                if (profile) {
+                    estado.usuarioLogado = {
+                        nome: profile.full_name,
+                        role: profile.role,
+                        cpf: profile.cpf,
+                        email: profile.email,
+                        id: profile.id
+                    };
+                    getEl('user-name').innerText = profile.full_name;
+                    const isAdmin = profile.role === 'direcao' || profile.role === 'admin';
+                    getEl('btn-admin').style.display = isAdmin ? 'flex' : 'none';
+                    getEl('login-screen').style.display = 'none';
+                    getEl('app-screen').style.display = 'flex';
+                    renderCalendar();
+                }
+            }
         })();
+
+        // Sincroniza abas diferentes do mesmo navegador em tempo real
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'sge_reservas') {
+                estado.reservas = loadReservas();
+                renderCalendar();
+            }
+        });
 
         // --- MANIPULADORES DE EVENTOS ---
         getEl('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const cpfInput = getEl('cpf').value;
-            const senha = getEl('senha').value;
-            const email = cpfInput.includes('@') ? cpfInput : `${cpfInput.replace(/\D/g, '')}@escola.com`;
+            const email = getEl('login-email').value;
+            const senha = getEl('login-senha').value;
 
-            const { data, error } = await _supabase.auth.signInWithPassword({ email, password: senha });
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: senha });
 
             if (error) {
-                alert("CPF ou senha incorretos.");
+                alert("Email ou senha incorretos. Verifique os dados e tente novamente.");
                 return;
             }
 
-            const { data: profile } = await _supabase.from('profiles').select('*').eq('id', data.user.id).single();
-            estado.usuarioLogado = profile;
+            const { data: profile } = await supabaseClient
+                .from('profiles')
+                .select('*')
+                .eq('id', data.user.id)
+                .single();
 
-            getEl('user-name').innerText = profile.full_name;
-            getEl('btn-admin').style.display = (profile?.role === 'direcao' || profile?.role === 'admin') ? 'flex' : 'none';
-            getEl('login-screen').style.display = 'none';
-            getEl('app-screen').style.display = 'flex';
-
-            // Carrega os dados reais do banco após o login
-            await loadResources();
-            estado.recursoSelecionado = estado.recursos[0];
-            renderSidebarRecursos();
-            await loadReservasSupabase();
+            if (profile) {
+                estado.usuarioLogado = {
+                    nome: profile.full_name,
+                    role: profile.role,
+                    cpf: profile.cpf,
+                    email: profile.email,
+                    id: profile.id
+                };
+                getEl('user-name').innerText = profile.full_name;
+                const isAdmin = profile.role === 'direcao' || profile.role === 'admin';
+                getEl('btn-admin').style.display = isAdmin ? 'flex' : 'none';
+                getEl('login-screen').style.display = 'none';
+                getEl('app-screen').style.display = 'flex';
+                renderCalendar();
+            }
         });
 
         getEl('link-auto-cadastro').addEventListener('click', (e) => {
@@ -1052,24 +1027,26 @@
 
         getEl('form-recuperar-senha').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const cpfInput = getEl('rec-cpf').value;
-            const email = cpfInput.includes('@') ? cpfInput : `${cpfInput.replace(/\D/g, '')}@escola.com`;
-            const { error } = await _supabase.auth.resetPasswordForEmail(email);
+            const email = getEl('rec-email').value;
+
+            const { error } = await supabaseClient.auth.resetPasswordForEmail(email);
+
             if (error) {
-                alert("Erro: " + error.message);
-            } else {
-                alert("Email de redefinição de senha enviado!");
-                getEl('form-recuperar-senha').reset();
-                getEl('modal-recuperar-senha').style.display = 'none';
+                alert("Erro ao solicitar redefinição: " + error.message);
+                return;
             }
+
+            alert("Link de redefinição enviado para seu email! Verifique sua caixa de entrada.");
+            getEl('form-recuperar-senha').reset();
+            getEl('modal-recuperar-senha').style.display = 'none';
         });
 
         getEl('logout-btn').addEventListener('click', async () => {
-            await _supabase.auth.signOut();
+            await supabaseClient.auth.signOut();
             location.reload();
         });
 
-        // Menu hambúrguer (mobile) / colapsar sidebar (desktop)
+        // Delegação de eventos para lista de recursos na sidebar
         getEl('btn-hamburger').addEventListener('click', () => {
             const sidebar = document.querySelector('.sidebar');
             if (window.innerWidth <= 768) {
@@ -1088,7 +1065,6 @@
             getEl('sidebar-overlay').classList.remove('active');
         });
 
-        // Delegação de eventos para lista de recursos na sidebar
         getEl('recursos-list').addEventListener('click', (e) => {
             const item = e.target.closest('li[data-id]');
             if (item) {
@@ -1112,38 +1088,135 @@
             getEl('modal-ia').style.display = 'flex';
         });
 
-        getEl('btn-ia-send').addEventListener('click', () => {
+        const processarIA = () => {
             const input = getEl('ia-input');
             const chatBox = getEl('ia-chat-box');
-            if (!input.value.trim()) return;
+            const prompt = input.value.trim();
+            if (!prompt) return;
 
+            // Mensagem do Usuário
             const userMsg = document.createElement('div');
-            userMsg.style = "background: #fff; padding: 10px; border-radius: 10px; align-self: flex-end; max-width: 80%; font-size: 0.9rem; border: 1px solid #eee;";
-            userMsg.innerText = input.value;
+            userMsg.style = "background: #fff; padding: 10px; border-radius: 10px; align-self: flex-end; max-width: 80%; font-size: 0.9rem; border: 1px solid #eee; margin-bottom: 5px;";
+            userMsg.innerText = prompt;
             chatBox.appendChild(userMsg);
 
-            const text = input.value.toLowerCase();
+            const text = prompt.toLowerCase();
             input.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // Indicador de "Digitando..."
+            const typingMsg = document.createElement('div');
+            typingMsg.style = "background: #eee; padding: 8px 12px; border-radius: 10px; align-self: flex-start; font-size: 0.8rem; color: #777; font-style: italic; margin-bottom: 5px;";
+            const escolher = (arr) => arr[Math.floor(Math.random() * arr.length)];
+            typingMsg.innerText = escolher(["Deixa eu ver...", "Consultando o sistema...", "Um momento, por favor...", "Estou verificando isso para você..."]);
+            chatBox.appendChild(typingMsg);
 
             setTimeout(() => {
+                chatBox.removeChild(typingMsg);
+                
                 const aiMsg = document.createElement('div');
-                aiMsg.style = "background: #dcf8c6; padding: 10px; border-radius: 10px; align-self: flex-start; max-width: 80%; font-size: 0.9rem;";
+                aiMsg.style = "background: #dcf8c6; padding: 10px; border-radius: 10px; align-self: flex-start; max-width: 80%; font-size: 0.9rem; margin-bottom: 5px;";
+                
+                const nomeCompleto = estado.usuarioLogado ? estado.usuarioLogado.nome : "colega";
+                const primeiroNome = nomeCompleto.split(' ')[0];
+                const hora = new Date().getHours();
+                const saudacaoPeriodo = hora < 12 ? "Bom dia" : hora < 18 ? "Boa tarde" : "Boa noite";
 
-                if (text.includes('livre') || text.includes('vago')) aiMsg.innerText = "Verifiquei aqui: o Carrinho Azul está com maior disponibilidade esta semana. Deseja ver os horários?";
-                else if (text.includes('ajuda')) aiMsg.innerText = "Posso te ajudar a realizar reservas, reportar problemas técnicos ou trocar sua senha.";
-                else aiMsg.innerText = "Como sua assistente virtual de TCC, estou aqui para mostrar como a IA pode otimizar a organização escolar!";
+                let resposta = "";
+                let acao = null;
 
+                // Identidade e Estado Emocional
+                if (text.match(/(quem é você|o que você é|qual seu nome|seu nome)/)) {
+                    resposta = escolher([
+                        `Opa! Eu sou a assistente virtual do SGE. Pense em mim como sua colega de TI que nunca dorme!`,
+                        `Ainda não ganhei um nome humano, mas sou eu quem cuida da lógica de reservas por aqui. Prazer em te ver!`,
+                        `Sou sua ajudante digital. Meu trabalho é garantir que você gaste menos tempo com burocracia e mais tempo com os alunos.`
+                    ]);
+                }
+                else if (text.match(/(como você está|tudo bem|tudo certo|como vai|você está bem)/)) {
+                    resposta = escolher([
+                        `Estou super bem, ${primeiroNome}! O sistema está rodando lisinho hoje. E por aí, muita correria com as aulas?`,
+                        `Tudo ótimo por aqui! Adoro quando os professores interagem comigo. Como posso te ajudar agora?`,
+                        `Estou ótima e pronta para trabalhar! O que temos na agenda hoje?`
+                    ]);
+                }
+                // Lógica de Saudação
+                else if (text.match(/(oi|olá|bom dia|boa tarde|boa noite|eai|opa|hey)/)) {
+                    resposta = escolher([
+                        `${saudacaoPeriodo}, ${primeiroNome}! Que bom te ver. Precisa de uma mãozinha com as reservas?`,
+                        `Oi, ${primeiroNome}! Tudo na paz? Em que posso ser útil hoje?`,
+                        `Opa! Como vai? Se precisar reservar algo ou reportar um defeito, é só falar.`
+                    ]);
+                }
+                // Dúvidas sobre o que a IA faz
+                else if (text.match(/(o que você faz|ajuda|funciona|como funciona|comandos|pode fazer)/)) {
+                    resposta = `Com certeza! Eu posso te ajudar com várias coisas:\n1. Reservar equipamentos (basta clicar nos horários livres).\n2. Reportar se algo quebrou (diga que 'está quebrado').\n3. Ver a disponibilidade dos carrinhos.\n4. Trocar sua senha.\n\nO que você precisa agora?`;
+                }
+                // Lógica de Reservas (Como fazer)
+                else if (text.match(/(como reservar|fazer reserva|agendar|marcar|passo a passo|tutorial|como faço|instrução)/)) {
+                    resposta = `Claro, ${primeiroNome}! É bem tranquilo reservar um recurso. Olha só o passo a passo que preparei para você:\n\n` +
+                               `1️⃣ **Escolha o Recurso**: Ali no menu lateral esquerdo, clique no carrinho ou laboratório que você deseja usar.\n` +
+                               `2️⃣ **Ache um horário livre**: No calendário que aparece no centro, procure o dia da sua aula e um horário que esteja em **verde** (escrito 'Livre').\n` +
+                               `3️⃣ **Clique no horário**: Basta dar um clique no quadradinho do horário escolhido.\n` +
+                               `4️⃣ **Preencha os detalhes**: Vai abrir uma janelinha. Se o sistema já souber qual é a sua aula naquele momento, eu até preencho o nome da turma para você! Caso contrário, é só digitar rapidinho.\n` +
+                               `5️⃣ **Confirme**: Clique no botão 'Confirmar Reserva'.\n\nProntinho! O horário vai ficar vermelho com o seu nome. Conseguiu entender ou quer que eu explique algum ponto de novo? 😊`;
+                }
+                // Lógica de Problemas/Manutenção
+                else if (text.match(/(problema|quebrado|defeito|estragou|parou|ajuda)/)) {
+                    resposta = escolher([
+                        `Puxa, que chato! Equipamento dando problema no meio da aula é horrível, né? Vou abrir a tela de reporte para você agora mesmo.`,
+                        `Pode deixar, ${primeiroNome}. Vamos resolver isso. Estou abrindo o formulário de manutenção para você registrar o ocorrido.`,
+                        `Sinto muito por esse imprevisto. Vou te encaminhar para a tela de reporte para o pessoal do TI verificar o quanto antes.`
+                    ]);
+                    acao = () => getEl('modal-manutencao').style.display = 'flex';
+                }
+                // Lógica de Disponibilidade
+                else if (text.match(/(livre|vago|disponivel|disponível|horario|horário)/)) {
+                    resposta = escolher([
+                        `Deixa eu dar uma olhadinha no sistema... Olha, o Carrinho Azul costuma ter mais horários livres esta semana!`,
+                        `O Carrinho Vermelho está bem concorrido, mas o laboratório costuma ter vagas sobrando na parte da tarde. Vale a pena conferir!`,
+                        `Encontrei alguns espaços! Temos vários slots livres amanhã cedo no Carrinho Azul, por exemplo.`
+                    ]);
+                }
+                // Lógica de Cancelamento ou Senha
+                else if (text.match(/(cancelar|excluir|senha|mudar|alterar)/)) {
+                    resposta = "Para isso, basta clicar no item desejado ou usar as opções do menu lateral. Se precisar, posso te mostrar onde fica.";
+                }
+                // Lógica de Agradecimento
+                else if (text.match(/(obrigado|vale|tchau|obrigada|show|legal)/)) {
+                    resposta = escolher([
+                        "Imagina! Boa aula para você.",
+                        "Disponha! Qualquer coisa é só me chamar.",
+                        "De nada! Espero que o sistema esteja ajudando na sua rotina."
+                    ]);
+                }
+                // Fallback (Não entendeu)
+                else {
+                    resposta = escolher([
+                        `Hum, ainda estou aprendendo a lidar com esse assunto. Mas posso te ajudar a reportar um defeito ou conferir as reservas. O que acha?`,
+                        `Não entendi muito bem, ${primeiroNome}. Tente perguntar sobre 'horários livres' ou diga que algo 'está quebrado'.`,
+                        `Pode repetir de outra forma? Sou especialista em ajudar com os recursos de tecnologia da escola!`
+                    ]);
+                }
+
+                aiMsg.innerText = resposta;
                 chatBox.appendChild(aiMsg);
                 chatBox.scrollTop = chatBox.scrollHeight;
-            }, 600);
-        });
+
+                if (acao) setTimeout(acao, 1000);
+
+            }, 1200); // Atraso de 1.2s para parecer mais humano
+        };
+
+        getEl('btn-ia-send').addEventListener('click', processarIA);
+        getEl('ia-input').addEventListener('keypress', (e) => { if(e.key === 'Enter') processarIA(); });
 
         getEl('btn-manutencao').addEventListener('click', () => getEl('modal-manutencao').style.display = 'flex');
 
-        getEl('btn-admin').addEventListener('click', () => {
+        getEl('btn-admin').addEventListener('click', async () => {
             const adminModal = getEl('modal-admin');
             if (adminModal) {
-                loadAdminData();
+                await renderAdminView();
                 adminModal.style.display = 'flex';
             } else {
                 alert("Erro: A área da direção não pôde ser aberta. O elemento 'modal-admin' não foi encontrado.");
@@ -1170,10 +1243,10 @@
         });
 
         // Busca de usuários
-        getEl('search-prof').addEventListener('keyup', (e) => {
-            renderAdminView(e.target.value.toLowerCase());
+        getEl('search-prof').addEventListener('keyup', async (e) => {
+            await renderAdminView(e.target.value.toLowerCase());
         });
-
+        
         // Abas da Administração
         document.querySelectorAll('.admin-tab-btn').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -1202,51 +1275,59 @@
             });
         });
 
-        getEl('form-reserva').addEventListener('submit', async (e) => {
+        getEl('form-reserva').addEventListener('submit', (e) => {
             e.preventDefault();
             const qtd = getEl('qtd-retirada').value;
             const turma = getEl('res-turma').value;
-
+            
+            // Fecha o modal e remove a aba lateral de seleção imediatamente
             getEl('modal-reserva').style.display = 'none';
             getEl('reserva-content').classList.remove('expanded');
 
             if (estado.slotClicado) {
                 const { idUnico, dia, mes, ano, hora } = estado.slotClicado;
-                const dbDate = `${ano}-${String(mes + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
-
-                const { error } = await _supabase.from('reservas').insert([{
-                    recurso_id: estado.recursoSelecionado.id,
-                    usuario_id: estado.usuarioLogado.id,
-                    data_reserva: dbDate,
-                    horario_inicio: hora,
-                    turma_disciplina: turma,
-                    quantidade: qtd,
-                    status_mouses: getEl('mouse-status')?.value || 'ok'
-                }]);
-
-                if (!error) {
-                    await loadReservasSupabase();
-                    setTimeout(() => {
-                        alert(`Reserva confirmada!\nRecurso: ${estado.recursoSelecionado.nome}\nLembre-se de carregar os aparelhos!`);
-                    }, 50);
-                } else {
-                    const jaReservado = error.code === '23505';
-                    alert("Erro ao reservar: " + (jaReservado ? "Este horário já foi reservado por outro professor." : error.message));
+                const reservaInfo = {
+                    id: `${idUnico}-${Date.now()}`, // ID único para cada reserva parcial
+                    slotId: idUnico,
+                    recursoNome: estado.recursoSelecionado.nome,
+                    data: `${String(dia).padStart(2, '0')}/${String(mes + 1).padStart(2, '0')}/${ano}`,
+                    hora: hora,
+                    turma: turma,
+                    qtd: qtd,
+                    professor: estado.usuarioLogado.nome
+                };
+                if (!estado.reservas.has(idUnico)) {
+                    estado.reservas.set(idUnico, []);
                 }
+                estado.reservas.get(idUnico).push(reservaInfo);
+                saveReservas(); // Salva no localStorage
+                renderCalendar();
+                renderTechCalendar();
+                // O alert é exibido após um breve delay para garantir que o modal já tenha sumido visualmente
+                setTimeout(() => {
+                    alert(`Reserva para ${qtd} item(ns) confirmada!\nRecurso: ${estado.recursoSelecionado.nome}\nLembre-se de carregar os aparelhos!`);
+                }, 50);
             }
         });
 
-        getEl('form-manutencao').addEventListener('submit', async (e) => {
+        getEl('form-manutencao').addEventListener('submit', (e) => {
             e.preventDefault();
-            const { error } = await _supabase.from('manutencoes').insert([{
-                equipamento: getEl('manut-equipamento').value,
-                descricao: getEl('manut-descricao').value,
-                reportado_por: estado.usuarioLogado.id
-            }]);
+            const equipamento = getEl('manut-equipamento').value;
+            const descricao = getEl('manut-descricao').value;
 
-            if (!error) alert('Relatório de manutenção enviado para a gestão!');
-            else alert('Erro: ' + error.message);
+            const problema = {
+                id: `prob-${Date.now()}`, // ID único para o problema
+                equipamento,
+                descricao,
+                data: new Date().toLocaleString('pt-BR'),
+                previsao: 'A definir',
+                status: 'Aberto', // Status para gerenciamento futuro
+                reportadoPor: estado.usuarioLogado.nome
+            };
+            estado.problemas.push(problema);
+            saveProblemas();
 
+            alert('Relatório de manutenção enviado para a gestão!');
             e.target.reset();
             getEl('modal-manutencao').style.display = 'none';
         });
@@ -1254,26 +1335,41 @@
         // Submit Cadastro Usuário
         getEl('form-cadastro').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const { data, error } = await _supabase.auth.signUp({
-                email: getEl('cad-email').value,
-                password: getEl('cad-senha').value,
+            const nome = getEl('cad-nome').value;
+            const email = getEl('cad-email').value;
+            const cpf = getEl('cad-cpf').value.replace(/\D/g, '');
+            const senha = getEl('cad-senha').value;
+            const role = getEl('cad-role').value;
+
+            // Verifica se CPF já existe na tabela profiles
+            const { data: existente } = await supabaseClient
+                .from('profiles')
+                .select('id')
+                .eq('cpf', cpf)
+                .maybeSingle();
+
+            if (existente) {
+                alert('Erro: CPF já cadastrado!');
+                return;
+            }
+
+            const { error } = await supabaseClient.auth.signUp({
+                email,
+                password: senha,
                 options: {
-                    data: {
-                        full_name: getEl('cad-nome').value,
-                        cpf: getEl('cad-cpf').value.replace(/\D/g, ''),
-                        role: getEl('cad-role').value
-                    }
+                    data: { full_name: nome, cpf, role }
                 }
             });
 
-            if (!error) {
-                alert('Cadastro realizado! Verifique o email para confirmar a conta.');
-                getEl('form-cadastro').reset();
-                getEl('modal-cadastro').style.display = 'none';
-                if (getEl('modal-admin').style.display === 'flex') loadAdminData();
-            } else {
-                alert('Erro: ' + error.message);
+            if (error) {
+                alert('Erro ao cadastrar: ' + error.message);
+                return;
             }
+
+            alert('Cadastro realizado com sucesso! Verifique seu email para confirmar a conta.');
+            getEl('form-cadastro').reset();
+            getEl('modal-cadastro').style.display = 'none';
+            renderAdminView();
         });
 
         // --- FUNÇÕES DE RENDERIZAÇÃO ---
@@ -1292,7 +1388,6 @@
                 list.appendChild(li);
             });
         }
-
         function renderSalaTecnica() {
             const tbody = getEl('tech-recursos-list-body');
             tbody.innerHTML = '';
@@ -1313,34 +1408,37 @@
             });
         }
 
-        window.editarCapacidade = async (index) => {
+        window.editarCapacidade = (index) => {
             const rec = estado.recursos[index];
             const novaQtd = prompt(`Ajustar capacidade total de: ${rec.nome}`, rec.total);
-            if (novaQtd === null || isNaN(novaQtd) || novaQtd.trim() === '') return;
-
-            const { error } = await _supabase.from('recursos').update({ total_equipamentos: parseInt(novaQtd) }).eq('id', rec.id);
-            if (!error) {
+            if (novaQtd !== null && !isNaN(novaQtd)) {
                 rec.total = parseInt(novaQtd);
                 renderSalaTecnica();
                 renderSidebarRecursos();
                 renderCalendar();
-            } else {
-                alert('Erro ao atualizar: ' + error.message);
             }
         };
 
-        window.excluirUsuario = () => {
-            alert('Por segurança, a remoção de contas de usuários deve ser feita pelo painel do Supabase (Authentication > Users).');
+        window.excluirUsuario = async (profileId) => {
+            const { data: profile } = await supabaseClient
+                .from('profiles')
+                .select('full_name')
+                .eq('id', profileId)
+                .single();
+
+            if (!profile) return;
+
+            if (confirm(`Deseja realmente excluir o usuário ${profile.full_name}?`)) {
+                await supabaseClient.from('profiles').delete().eq('id', profileId);
+                renderAdminView();
+            }
         };
 
-        window.resolverProblema = async (id) => {
-            if (confirm("Deseja marcar este problema como concluído?")) {
-                const { error } = await _supabase.from('manutencoes').update({ status: 'Resolvido' }).eq('id', id);
-                if (!error) {
-                    loadAdminData();
-                } else {
-                    alert('Erro ao atualizar: ' + error.message);
-                }
+        window.resolverProblema = (id) => {
+            if (confirm("Deseja marcar este problema como resolvido? Ele será removido permanentemente da lista.")) {
+                estado.problemas = estado.problemas.filter(p => p.id !== id);
+                saveProblemas();
+                renderAdminView();
             }
         };
 
@@ -1348,7 +1446,7 @@
             const grid = getEl('tech-calendar-body');
             if (!grid) return;
             grid.innerHTML = '';
-
+            
             const ano = estado.dataAtual.getFullYear();
             const mes = estado.dataAtual.getMonth();
             getEl('tech-current-month').innerText = new Date(ano, mes).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
@@ -1367,50 +1465,76 @@
             }
 
             const slotsDoTurno = gerarSlots(estado.turnoAtual);
-            const recSala = estado.recursos.find(r => r.id === 'sala-tec') || { id: 'sala-tec', nome: 'Sala Técnica', total: 1, icone: 'fa-server' };
+            const recSala = { id: 'sala-tec', nome: 'Sala Técnica', total: 1, icone: 'fa-server' }; // Define Sala Técnica como um recurso aqui
 
             for (let dia = 1; dia <= diasNoMes; dia++) {
                 const dataAtualLoop = new Date(ano, mes, dia);
                 if (dataAtualLoop.getDay() === 0 || dataAtualLoop.getDay() === 6) continue;
-                const ehPassado = dataAtualLoop < hoje;
 
                 const cell = document.createElement('div');
                 cell.className = 'day-cell';
-                cell.style.minHeight = '70px';
-                cell.innerHTML = `<span class="day-number" style="font-size: 0.8rem;">${dia}</span>`;
-
+                cell.innerHTML = `<span class="day-number">${dia}</span>`;
+                
                 const slotsContainer = document.createElement('div');
                 slotsContainer.className = 'slots-container';
 
                 slotsDoTurno.forEach(slot => {
                     const divSlot = document.createElement('div');
-                    divSlot.innerText = slot.inicio;
+                    divSlot.innerText = `${slot.inicio} - ${slot.fim}`;
                     divSlot.className = `slot ${slot.tipo === 'intervalo' ? 'intervalo' : 'livre'}`;
-                    divSlot.style.fontSize = '0.65rem';
-                    const idUnico = `${dia}-${mes}-${ano}-${slot.inicio}-sala-tec`;
+                    const idUnico = `${dia}-${mes}-${ano}-${slot.inicio}-sala-tec`; // ID único para Sala Técnica
 
                     if (slot.tipo === 'aula') {
-                        if (estado.reservas.has(idUnico)) {
-                            const reserva = estado.reservas.get(idUnico);
-                            divSlot.classList.replace('livre', 'ocupado');
-                            divSlot.title = `Sala Ocupada por ${reserva.professor}`;
+                        const reservasNoSlot = estado.reservas.get(idUnico) || [];
+                        const totalReservado = reservasNoSlot.reduce((sum, r) => sum + parseInt(r.qtd), 0);
+                        const disponivel = recSala.total - totalReservado;
 
-                            const podeExcluir = estado.usuarioLogado && (reserva.professor === estado.usuarioLogado.full_name || estado.usuarioLogado.role === 'direcao' || estado.usuarioLogado.role === 'admin');
-                            if (podeExcluir) {
-                                divSlot.style.cursor = 'pointer';
-                                divSlot.title += "\n(Clique para cancelar)";
-                                divSlot.onclick = () => cancelarReserva(idUnico, reserva);
+                        if (totalReservado > 0) {
+                            if (disponivel <= 0) {
+                                divSlot.classList.replace('livre', 'ocupado');
+                                divSlot.innerHTML = `<span style="font-size:0.75rem">${slot.inicio}</span><br><strong>LOTADO</strong>`;
+                            } else {
+                                divSlot.innerHTML = `<span style="font-size:0.75rem">${slot.inicio}</span><br><strong>${disponivel} disp.</strong>`;
                             }
-                        } else if (!ehPassado) {
+                            
+                            let detalhesHtml = "";
+                            reservasNoSlot.forEach(r => {
+                                detalhesHtml += `
+                                    <div style="font-size:0.65rem; border-top:1px solid #eee; margin-top:2px; padding-top:2px; color:#444; line-height:1.1;">
+                                        <strong>${r.professor}</strong>: ${r.turma} (${r.qtd})
+                                    </div>`;
+                            });
+                            divSlot.innerHTML += detalhesHtml;
+
+                            let tooltip = "Reservas neste horário:\n";
+                            reservasNoSlot.forEach(r => tooltip += `- ${r.professor}: ${r.qtd} (${r.turma})\n`);
+                            divSlot.title = tooltip;
+
+                            const minhaReserva = reservasNoSlot.find(r => r.professor === (estado.usuarioLogado ? estado.usuarioLogado.nome : ""));
+                            if (disponivel <= 0 && (minhaReserva || (estado.usuarioLogado && (estado.usuarioLogado.role === 'direcao' || estado.usuarioLogado.role === 'admin')))) {
+                                divSlot.style.cursor = 'pointer';
+                                divSlot.onclick = () => {
+                                    const resParaCancelar = minhaReserva || reservasNoSlot[0];
+                                    cancelarReserva(idUnico, resParaCancelar);
+                                };
+                            }
+                        } else {
+                            divSlot.setAttribute('aria-label', descAcessibilidade + "Disponível para reserva.");
+                    divSlot.innerHTML = `${slot.inicio} - ${slot.fim}<br><span style="font-size:0.65rem;">(Sala disponível)</span>`;
+                        }
+
+                        if (disponivel > 0 && !(dataAtualLoop < hoje)) {
                             divSlot.onclick = () => {
+                                // Temporariamente define o recurso selecionado para a Sala Técnica para o modal de reserva
                                 const recursoAnterior = estado.recursoSelecionado;
                                 estado.recursoSelecionado = recSala;
-                                abrirModalReserva(dia, mes, ano, slot.inicio, idUnico);
-                                estado.recursoSelecionado = recursoAnterior;
+                                abrirModalReserva(dia, mes, ano, slot.inicio, idUnico, disponivel);
+                                estado.recursoSelecionado = recursoAnterior; // Restaura o recurso selecionado
                             };
-                        } else {
+                        } else if (disponivel > 0 && dataAtualLoop < hoje) {
                             divSlot.style.opacity = '0.5';
                             divSlot.style.cursor = 'not-allowed';
+                            divSlot.title = "Data passada bloqueada para reserva.";
                         }
                     }
                     slotsContainer.appendChild(divSlot);
@@ -1430,29 +1554,25 @@
         function renderCalendar() {
             const grid = getEl('calendar-body');
             const isSalaTec = estado.recursoSelecionado.id === 'sala-tec';
-
+            
             // Feedback Visual de Troca
-            const hoje = new Date();
-            hoje.setHours(0, 0, 0, 0);
-            const diaHoje = hoje.getDate();
-            const mesHoje = hoje.getMonth();
-            const anoHoje = hoje.getFullYear();
-
             const tituloNome = getEl('titulo-recurso-nome');
             const tituloIcone = getEl('titulo-recurso-icone');
-
+            
             tituloNome.innerText = `Reservas: ${estado.recursoSelecionado.nome}`;
             tituloIcone.className = `fa-solid ${estado.recursoSelecionado.icone}`;
-
+            
             grid.classList.remove('recurso-animado');
             void grid.offsetWidth; // Trigger reflow para reiniciar animação
             grid.classList.add('recurso-animado');
 
             grid.innerHTML = '';
-
+            
             const ano = estado.dataAtual.getFullYear();
             const mes = estado.dataAtual.getMonth();
-
+            const hoje = new Date();
+            hoje.setHours(0, 0, 0, 0);
+            
             getEl('current-month').innerText = new Date(ano, mes).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
 
             const primeiroDiaDoMes = new Date(ano, mes, 1);
@@ -1462,9 +1582,10 @@
             let diaSemanaInicio = primeiroDiaDoMes.getDay();
 
             // Se o mês começa no Sábado (6) ou Domingo (0), não precisamos de padding.
+            // O primeiro dia útil (segunda) vai naturalmente se alinhar no início.
             let padding = 0;
             if (diaSemanaInicio > 0 && diaSemanaInicio < 6) { // Se for de Seg a Sex
-                padding = diaSemanaInicio - 1;
+                padding = diaSemanaInicio - 1; // 1(Seg) -> 0 padding, 5(Sex) -> 4 padding
             }
 
             for (let i = 0; i < padding; i++) {
@@ -1487,12 +1608,8 @@
 
                 const cell = document.createElement('div');
                 cell.className = 'day-cell';
-                if (dia === diaHoje && mes === mesHoje && ano === anoHoje) {
-                    cell.classList.add('today');
-                }
-
                 cell.innerHTML = `<span class="day-number">${dia}</span>`;
-
+                
                 const slotsContainer = document.createElement('div');
                 slotsContainer.className = 'slots-container';
 
@@ -1503,35 +1620,60 @@
                     divSlot.setAttribute('role', 'button');
                     divSlot.setAttribute('tabindex', '0');
                     const idUnico = `${dia}-${mes}-${ano}-${slot.inicio}-${estado.recursoSelecionado.id}`;
-                    let descAcessibilidade = `${slot.inicio} às ${slot.fim}, dia ${dia} de ${getEl('current-month').innerText}. `;
 
                     if (slot.tipo === 'aula') {
-                        if (estado.reservas.has(idUnico)) {
-                            const reserva = estado.reservas.get(idUnico);
-                            divSlot.classList.replace('livre', 'ocupado');
-                            // Mostra a turma e muda o title para detalhes completos
-                            divSlot.innerHTML = `<span style="font-size:0.75rem">${slot.inicio}</span><br><strong>${isSalaTec ? 'Sala ocupada' : (reserva.turma || 'Reservado')}</strong>`;
-                            divSlot.title = `Prof: ${reserva.professor}\nTurma: ${reserva.turma}\nQtd: ${reserva.qtd}`;
-                            divSlot.setAttribute('aria-label', descAcessibilidade + (isSalaTec ? "Sala ocupada. " : "Lotado. ") + `Reservado por ${reserva.professor} para ${reserva.turma}`);
+                        const reservasNoSlot = estado.reservas.get(idUnico) || [];
+                        const totalReservado = reservasNoSlot.reduce((sum, r) => sum + parseInt(r.qtd), 0);
+                        const disponivel = estado.recursoSelecionado.total - totalReservado;
+                        
+                        let descAcessibilidade = `${slot.inicio} às ${slot.fim}, dia ${dia} de ${getEl('current-month').innerText}. `;
 
-                            // Permite que o dono da reserva ou a direção cancele
-                            const podeExcluir = estado.usuarioLogado && (reserva.professor === estado.usuarioLogado.full_name || estado.usuarioLogado.role === 'direcao' || estado.usuarioLogado.role === 'admin');
-                            if (podeExcluir) {
+                        if (totalReservado > 0) {
+                            if (disponivel <= 0) {
+                                divSlot.setAttribute('aria-label', descAcessibilidade + (isSalaTec ? "Sala ocupada. " : "Lotado. ") + 
+                                    reservasNoSlot.map(r => `Reservado por ${r.professor} para ${r.turma}`).join(', '));
+                                divSlot.classList.replace('livre', 'ocupado');
+                                divSlot.innerHTML = `<span style="font-size:0.75rem">${slot.inicio}</span><br><strong>${isSalaTec ? 'Sala ocupada' : 'LOTADO'}</strong>`;
+                            } else {
+                                divSlot.setAttribute('aria-label', descAcessibilidade + (isSalaTec ? "Sala disponível. " : `${disponivel} unidades disponíveis. `) + "Já possui reservas de: " + 
+                                    reservasNoSlot.map(r => `${r.professor}`).join(', '));
+                                divSlot.innerHTML = `<span style="font-size:0.75rem">${slot.inicio}</span><br><strong>${isSalaTec ? 'Sala disponível' : disponivel + ' disp.'}</strong>`;
+                            }
+                            
+                            // Mostra detalhes de cada reserva (Professor, Turma/Matéria e Qtd)
+                            let detalhesHtml = "";
+                            reservasNoSlot.forEach(r => {
+                                detalhesHtml += `
+                                    <div style="font-size:0.65rem; border-top:1px solid #eee; margin-top:2px; padding-top:2px; color:#444; line-height:1.1;">
+                                        <strong>${r.professor}</strong>: ${r.turma} (${r.qtd})
+                                    </div>`;
+                            });
+                            divSlot.innerHTML += detalhesHtml;
+
+                            let tooltip = "Reservas neste horário:\n";
+                            reservasNoSlot.forEach(r => tooltip += `- ${r.professor}: ${r.qtd} (${r.turma})\n`);
+                            divSlot.title = tooltip;
+
+                            // Se lotado e for dono/admin, permite clicar para cancelar a última/própria
+                            const minhaReserva = reservasNoSlot.find(r => r.professor === (estado.usuarioLogado ? estado.usuarioLogado.nome : ""));
+                            if (disponivel <= 0 && (minhaReserva || (estado.usuarioLogado && (estado.usuarioLogado.role === 'direcao' || estado.usuarioLogado.role === 'admin')))) {
                                 divSlot.style.cursor = 'pointer';
-                                divSlot.style.opacity = '1';
-                                divSlot.title += "\n(Clique para cancelar)";
-                                divSlot.onclick = () => cancelarReserva(idUnico, reserva);
+                                divSlot.onclick = () => {
+                                    const resParaCancelar = minhaReserva || reservasNoSlot[0];
+                                    cancelarReserva(idUnico, resParaCancelar);
+                                };
                             }
                         } else {
                             divSlot.setAttribute('aria-label', descAcessibilidade + (isSalaTec ? "Sala disponível para reserva." : "Disponível para reserva."));
-                            // Se estiver livre, mantém o padrão
-                            if (!ehPassado) {
-                                divSlot.onclick = () => abrirModalReserva(dia, mes, ano, slot.inicio, idUnico);
-                            } else {
-                                divSlot.style.opacity = '0.5';
-                                divSlot.style.cursor = 'not-allowed';
-                                divSlot.title = "Não é possível reservar datas passadas.";
-                            }
+                            divSlot.innerHTML = `${slot.inicio} - ${slot.fim}<br><span style="font-size:0.65rem;">(${isSalaTec ? 'Sala disponível' : disponivel + ' disp.'})</span>`;
+                        }
+
+                        if (disponivel > 0 && !ehPassado) {
+                            divSlot.onclick = () => abrirModalReserva(dia, mes, ano, slot.inicio, idUnico, disponivel);
+                        } else if (disponivel > 0 && ehPassado) {
+                            divSlot.style.opacity = '0.5';
+                            divSlot.style.cursor = 'not-allowed';
+                            divSlot.title = "Não é possível reservar datas passadas.";
                         }
                     }
                     slotsContainer.appendChild(divSlot);
@@ -1541,43 +1683,49 @@
             }
         }
 
-        async function cancelarReserva(idUnico, reserva) {
-            if (confirm(`Deseja cancelar a reserva de ${reserva.recursoNome} para o dia ${reserva.data} às ${reserva.hora}?`)) {
-                const { error } = await _supabase.from('reservas').delete().eq('id', reserva.id);
-                if (!error) {
-                    estado.reservas.delete(idUnico);
-                    if (getEl('modal-admin').style.display === 'flex') loadAdminData();
-                    renderCalendar();
-                    renderTechCalendar();
-                } else {
-                    alert("Erro ao cancelar: " + error.message);
+        function cancelarReserva(idUnico, reservaParaRemover) {
+            if (confirm(`Deseja cancelar a reserva de ${reservaParaRemover.recursoNome} (${reservaParaRemover.qtd} unid) para o dia ${reservaParaRemover.data}?`)) {
+                const reservas = estado.reservas.get(idUnico);
+                if (reservas) {
+                    const novaLista = reservas.filter(r => r.id !== (reservaParaRemover.id || idUnico));
+                    if (novaLista.length > 0) {
+                        estado.reservas.set(idUnico, novaLista);
+                    } else {
+                        estado.reservas.delete(idUnico);
+                    }
                 }
+                saveReservas();
+                alert("Reserva cancelada com sucesso!");
+                renderCalendar(); // Atualiza o calendário principal
+                renderTechCalendar();
             }
         }
-        window.cancelarReserva = cancelarReserva;
 
-        function abrirModalReserva(dia, mes, ano, hora, idUnico) {
+        function abrirModalReserva(dia, mes, ano, hora, idUnico, disponivelNoSlot) {
             estado.slotClicado = { idUnico, dia, mes, ano, hora };
 
             getEl('res-recurso').innerText = estado.recursoSelecionado.nome;
             getEl('res-data').innerText = `${String(dia).padStart(2, '0')}/${String(mes + 1).padStart(2, '0')}/${ano}`;
             getEl('res-hora').innerText = hora;
-
-            getEl('res-prof-modal').innerText = estado.usuarioLogado ? estado.usuarioLogado.full_name : "Visitante";
-            getEl('res-qtd-disponivel').innerText = `${estado.recursoSelecionado.total} unidades`;
+            
+            // Preenche o nome do professor e a quantidade disponível no modal
+            const disponivel = disponivelNoSlot !== undefined ? disponivelNoSlot : estado.recursoSelecionado.total;
+            
+            getEl('res-prof-modal').innerText = estado.usuarioLogado ? estado.usuarioLogado.nome : "Visitante";
+            getEl('res-qtd-disponivel').innerText = `${disponivel} unidades`;
 
             const qtdInput = getEl('qtd-retirada');
-            qtdInput.max = estado.recursoSelecionado.total;
-            qtdInput.value = estado.recursoSelecionado.total;
-
+            qtdInput.max = disponivel;
+            qtdInput.value = disponivel;
+            
             // --- LÓGICA DE SUGESTÃO DE AULA ---
             const inputTurma = getEl('res-turma');
             const infoBox = getEl('aula-sugerida-box');
             const infoTexto = getEl('aula-sugerida-texto');
-
+            
             inputTurma.value = ''; // Limpa inicialmente
             infoBox.style.display = 'none';
-
+            
             // Reseta seleção visual do painel lateral
             selTurma = ""; selMateria = "";
             document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('selected'));
@@ -1586,11 +1734,11 @@
             // Verifica na grade se tem aula
             const dataClique = new Date(ano, mes, dia);
             const diaSemana = dataClique.getDay(); // 0-6
-            const nomeProf = estado.usuarioLogado.full_name;
-
+            const nomeProf = estado.usuarioLogado.nome;
+            
             if (MOCK_HORARIOS[nomeProf] && MOCK_HORARIOS[nomeProf][diaSemana]) {
                 const aulaEncontrada = MOCK_HORARIOS[nomeProf][diaSemana].find(a => a.hora === hora);
-
+                
                 if (aulaEncontrada) {
                     const textoAula = `${aulaEncontrada.turma} - ${aulaEncontrada.mat}`;
                     inputTurma.value = textoAula; // Preenche automático
@@ -1600,18 +1748,18 @@
             }
 
             getEl('mouse-check-group').style.display = estado.recursoSelecionado.hasMouse ? 'block' : 'none';
-
+            
             getEl('modal-reserva').style.display = 'flex';
         }
 
-        function renderAdminView(filter = '') {
+        async function renderAdminView(filter = '') {
             const problemasEl = getEl('admin-problemas-list');
             const usersEl = getEl('admin-users-list');
             const todasReservasEl = getEl('admin-todas-reservas-list');
             const pendenciasEl = getEl('admin-pendencias-list');
-
+            
             // 1. Renderiza problemas (Manutenção) em Tabela
-            problemasEl.innerHTML = '';
+            problemasEl.innerHTML = ''; 
             if (estado.problemas.length === 0) {
                 problemasEl.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">Nenhum equipamento em manutenção.</td></tr>';
             } else {
@@ -1633,24 +1781,28 @@
                 }
             }
 
-            // 2. Renderiza Lista de Usuários (Tabela com Filtro)
+            // 2. Renderiza Lista de Usuários via Supabase Profiles
             usersEl.innerHTML = '';
-            const filtrados = estado.listaUsuarios.filter(u =>
-                u.full_name.toLowerCase().includes(filter) || u.cpf.includes(filter)
-            );
+            const { data: profiles } = await supabaseClient
+                .from('profiles')
+                .select('*')
+                .order('full_name');
 
-            if (filtrados.length === 0) {
+            if (!profiles || profiles.length === 0) {
                 usersEl.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:15px;">Nenhum usuário encontrado.</td></tr>';
             } else {
-                filtrados.forEach(u => {
+                const filtrados = profiles.filter(p =>
+                    !filter || p.full_name.toLowerCase().includes(filter) || p.cpf.includes(filter)
+                );
+                filtrados.forEach(p => {
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td>${u.full_name}</td>
-                        <td>${u.cpf}</td>
-                        <td><span class="status-badge ${u.role === 'admin' || u.role === 'direcao' ? 'pendente' : 'ok'}">${u.role}</span></td>
+                        <td>${p.full_name}</td>
+                        <td>${p.cpf}</td>
+                        <td><span class="status-badge ${p.role === 'admin' || p.role === 'direcao' ? 'pendente' : 'ok'}">${p.role}</span></td>
                         <td>
                              <button class="action-btn" title="Editar"><i class="fa-solid fa-pen"></i></button>
-                             <button class="action-btn btn-delete" title="Remover" onclick="excluirUsuario()"><i class="fa-solid fa-trash"></i></button>
+                             <button class="action-btn btn-delete" title="Remover" onclick="excluirUsuario('${p.id}')"><i class="fa-solid fa-trash"></i></button>
                         </td>
                     `;
                     usersEl.appendChild(tr);
@@ -1659,13 +1811,11 @@
 
             // 3. Renderiza Todas as Reservas
             todasReservasEl.innerHTML = '';
-            const reservasList = Array.from(estado.reservas.entries()).map(([slotKey, res]) => ({ ...res, slotKey }));
-
-            if (reservasList.length === 0) {
+            if (estado.reservas.size === 0) {
                 todasReservasEl.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px;">Nenhuma reserva encontrada.</td></tr>';
             } else {
-                // Ordena por data e hora para melhor visualização
-                const reservasOrdenadas = reservasList.sort((a, b) => {
+                // Converte o Map para Array e ordena por data e hora para melhor visualização
+                const reservasOrdenadas = Array.from(estado.reservas.values()).flat().sort((a, b) => {
                     const dateA = new Date(a.data.split('/').reverse().join('-') + 'T' + a.hora);
                     const dateB = new Date(b.data.split('/').reverse().join('-') + 'T' + b.hora);
                     return dateA - dateB;
@@ -1681,7 +1831,7 @@
                         <td>${reserva.qtd}</td>
                         <td>${reserva.professor}</td>
                         <td>
-                            <button class="action-btn btn-delete" title="Cancelar Reserva" onclick="window.cancelarReserva('${reserva.slotKey}', ${JSON.stringify(reserva).replace(/"/g, '&quot;')})">
+                            <button class="action-btn btn-delete" title="Cancelar Reserva" onclick="cancelarReserva('${reserva.slotId || reserva.id}', ${JSON.stringify(reserva).replace(/"/g, '&quot;')}); renderAdminView();">
                                 <i class="fa-solid fa-xmark"></i> Cancelar
                             </button>
                         </td>
@@ -1715,7 +1865,7 @@
         }
 
         // Inicializa a aplicação
-        // A renderização inicial acontece após o login (ou após restaurar a sessão).
+        // A renderização inicial acontece após o login.
     });
     </script>
 </body>

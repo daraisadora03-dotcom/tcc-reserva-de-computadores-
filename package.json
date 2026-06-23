@@ -1,0 +1,13 @@
+{
+  "name": "tcc-reserva-de-computadores",
+  "version": "2.0.0",
+  "description": "SGE - Sistema de Gestão Escolar para Reserva de Computadores",
+  "scripts": {
+    "build": "echo 'Static site - no build required'",
+    "start": "npx serve ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/daraisadora03-dotcom/tcc-reserva-de-computadores-.git"
+  }
+}
